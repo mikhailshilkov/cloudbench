@@ -1,0 +1,5 @@
+name: azure-coldstart
+description: A minimal TypeScript program
+runtime: nodejs
+template:
+  description: A minimal TypeScript program
