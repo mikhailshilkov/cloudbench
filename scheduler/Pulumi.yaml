@@ -1,5 +1,3 @@
-name: azure-coldstart
-description: A minimal TypeScript program
+name: cloudbench-scheduler
+description: Scheduler for CloudBench
 runtime: nodejs
-template:
-  description: A minimal TypeScript program

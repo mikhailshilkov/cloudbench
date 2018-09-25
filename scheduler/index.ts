@@ -1,108 +1,48 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as azure from "@pulumi/azure";
-import { functionApp, subscription } from "@pulumi/azure-serverless";
+import * as cloud from "@pulumi/cloud";
+import * as r from "request";
 
-interface TimerBinding extends subscription.Binding {
-    /**
-     * The name of the property in the context object to bind the timer info to. Not really
-     * important in our implementation as the timer info will be passed as the second argument to
-     * the callback function.
-     */
-    name: string;
+const name = pulumi.getStack();
 
-    /**
-     * The type of a timer binding.  Must be 'timerTrigger'.
-     */
-    type: "timerTrigger";
+const config = new pulumi.Config(name);
+const appInsightsKey = config.get("appInsightsKey");
+if (!appInsightsKey) console.error("AppInsights key not found!");
 
-    /**
-     * The direction of the binding. Timer is only defined as input to functions.
-     */
-    direction: "in";
+function ping(url: string) : Promise<void> {
+    const request = require("request");
+    const appInsights = require("applicationinsights");
+    appInsights.setup(appInsightsKey).setUseDiskRetryCaching(false);
+    const client = appInsights.defaultClient;
+        
+    console.log("Sending request to " + url);
+      
+    const start = process.hrtime();
+    return new Promise(function(resolve, reject){
+        request(url, function (error: any, response: r.Response, body: string) {
+            if (error) {
+                console.log(error);
+                return reject(error);
+            }
 
-    /**
-     * The CRON expression of the timer schedule.
-     */
-    schedule: string;
-}
+            const hrtime = process.hrtime(start);
+            const duration = 1000*hrtime[0] + Math.round(hrtime[1] / 1000000);
 
-/**
- * Data that will be passed along in the context object to the TimerContext.
- */
-export interface TimerContext extends subscription.Context {
-    executionContext: {
-        invocationId: string;
-        functionName: string;
-        functionDirectory: string;
-    };
-
-    "bindingData": {
-        "timerTrigger": string,
-        "sys": {
-            "methodName": string,
-            "utcNow": string,
-        },
-        "invocationId": string,
-    };
-}
-
-/**
- * Auxiliary timer information that will be passed as the second argument to the callback function.
- */
-export interface TimerInfo {
-    isPastDue: boolean;
-    last: string;
-    next: string;
-}
-
-/**
- * Signature of the callback that can receive timer notifications.
- */
-export type TimerCallback = subscription.Callback<TimerContext, TimerInfo>;
-
-export interface TimerEventSubscriptionArgs extends subscription.EventSubscriptionArgs<TimerContext, TimerInfo> {
-    /**
-     * The CRON expression of the timer schedule.
-     */
-    schedule: pulumi.Input<string>;
-}
-
-/**
- * Creates a new subscription to the given time schedule using the callback provided, along with optional
- * options to control the behavior of the subscription.
- */
-export async function onTimer(
-    name: string, account: azure.storage.Account,
-    args: TimerEventSubscriptionArgs, opts?: pulumi.ResourceOptions): Promise<TimerEventSubscription> {
-
-    args = args || {};
-
-    const bindings = pulumi.output(args.schedule).apply(s => {
-        const timerBinding: TimerBinding = {
-            name: "timer",
-            type: "timerTrigger",
-            direction: "in",
-            schedule: s
-        };
-
-        return [timerBinding];
+            try {
+                client.trackMetric({name: `CloudBench_Azure_${body}`, value: duration}); 
+                client.flush({callback: () =>{
+                    console.log(`Tracked ${body} in ${duration}ms`);
+                    resolve();
+                }});
+            } catch (err) {
+                console.log(err);
+                reject(err);
+            }
+        });
     });
-
-    return new TimerEventSubscription(name, account, bindings, args, opts);
 }
-
-export class TimerEventSubscription extends subscription.EventSubscription<TimerContext, TimerInfo> {
-    readonly account: azure.storage.Account;
-
-    constructor(
-        name: string, account: azure.storage.Account, bindings: pulumi.Output<TimerBinding[]>,
-        args: subscription.EventSubscriptionArgs<TimerContext, TimerInfo>, options?: pulumi.ResourceOptions) {
-
-        super("azure-serverless:account:TimerEventSubscription", name, bindings, args, options);
-
-        this.account = account;
-    }
-}
+cloud.timer.cron("schedulev1js", "0 */30 * * * *", () => ping("https://v1js-fad886ed8e.azurewebsites.net/api/v1js"));
+cloud.timer.cron("schedulev2js", "0 */30 * * * *", () => ping("https://v2js-fab09dff35.azurewebsites.net/api/v2js"));
 
 const resourceGroup = new azure.core.ResourceGroup("cloudbench", {
     location: "West Europe",
@@ -115,13 +55,5 @@ const storageAccount = new azure.storage.Account("cloudbenchsa", {
     accountReplicationType: "LRS",
     accountTier: "Standard",
 });
-let fn = onTimer("fn", storageAccount, {
-    func: (context, msg) => {
-        console.log(context);
-        console.log(msg.next);
-        context.done();
-    },
-    schedule: "0 * * * * *",
-    resourceGroup: resourceGroup,
-});
+
 //export let endpoint = fn.endpoint;

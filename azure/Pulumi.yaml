@@ -1,0 +1,3 @@
+name: Cloudbench Azure Functions
+description: Cloudbench Azure Functions
+runtime: nodejs
