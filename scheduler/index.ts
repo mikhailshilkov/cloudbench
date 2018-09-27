@@ -41,8 +41,13 @@ function ping(url: string) : Promise<void> {
         });
     });
 }
-cloud.timer.cron("schedulev1js", "0 */30 * * * *", () => ping("https://v1js-fad886ed8e.azurewebsites.net/api/v1js"));
-cloud.timer.cron("schedulev2js", "0 */30 * * * *", () => ping("https://v2js-fab09dff35.azurewebsites.net/api/v2js"));
+cloud.timer.cron("scheduler", "0 */30 * * * *", async () => {
+    await ping("https://v1js-fad886ed8e.azurewebsites.net/api/v1js");
+    await ping("https://v1dotnet-faf61b2cf5.azurewebsites.net/api/v1dotnet");
+    await ping("https://v2js-fab09dff35.azurewebsites.net/api/v2js");
+    await ping("https://v2dotnet-fa249cdc28.azurewebsites.net/api/v2dotnet");
+    await ping ("https://v2java-facf684788.azurewebsites.net/api/v2java");
+});
 
 const resourceGroup = new azure.core.ResourceGroup("cloudbench", {
     location: "West Europe",

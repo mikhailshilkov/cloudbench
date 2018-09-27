@@ -98,6 +98,14 @@ const v1js = new MyFunctionApp("v1js", {
     version: "~1"
 });
 
+const v1dotnet = new MyFunctionApp("v1dotnet", {
+    resourceGroup,
+    storageAccount,
+    storageContainer,
+    path: "v1/dotnet/bin/Debug/net461/publish",
+    version: "~1"
+});
+
 const v2js = new MyFunctionApp("v2js", {
     resourceGroup,
     storageAccount,
@@ -106,5 +114,24 @@ const v2js = new MyFunctionApp("v2js", {
     version: "beta"
 });
 
+const v2dotnet = new MyFunctionApp("v2dotnet", {
+    resourceGroup,
+    storageAccount,
+    storageContainer,
+    path: "v2/dotnet/bin/Debug/netstandard2.0/publish",
+    version: "beta"
+});
+
+const v2java = new MyFunctionApp("v2java", {
+    resourceGroup,
+    storageAccount,
+    storageContainer,
+    path: "v2/java/target/azure-functions/v2java",
+    version: "beta"
+});
+
 exports.v1js = v1js.url;
+exports.v1dotnet = v1dotnet.url;
 exports.v2js = v2js.url;
+exports.v2dotnet = v2dotnet.url;
+exports.v2java = v2java.url;
