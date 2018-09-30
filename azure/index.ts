@@ -6,6 +6,7 @@ export interface MyAppServiceOptions {
     readonly resourceGroup: azure.core.ResourceGroup;
     readonly storageAccount: azure.storage.Account;
     readonly storageContainer: azure.storage.Container;
+    readonly appInsights: azure.appinsights.Insights;
     readonly path: string;
     readonly version: string;
 }
@@ -53,7 +54,9 @@ class MyFunctionApp extends pulumi.ComponentResource {
             appSettings: {
                 "WEBSITE_RUN_FROM_ZIP": codeBlobUrl,
                 "FUNCTIONS_EXTENSION_VERSION": "~2",
-                "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1"
+                "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
+                "ApplicationInsights:InstrumentationKey": appInsights.instrumentationKey,
+                "APPINSIGHTS_INSTRUMENTATIONKEY": appInsights.instrumentationKey                        
             },
         
             version: options.version
@@ -90,48 +93,66 @@ const storageContainer = new azure.storage.Container(`${name}-c`, {
     containerAccessType: "private",
 });
 
-const v1js = new MyFunctionApp("v1js", {
-    resourceGroup,
-    storageAccount,
-    storageContainer,
-    path: "v1/js",
-    version: "~1"
+const appInsights = new azure.appinsights.Insights(`${name}-ai`, {
+    resourceGroupName: resourceGroup.name,
+    applicationType: 'Web',
+    location: "West Europe"
 });
 
-const v1dotnet = new MyFunctionApp("v1dotnet", {
-    resourceGroup,
-    storageAccount,
-    storageContainer,
-    path: "v1/dotnet/bin/Debug/net461/publish",
-    version: "~1"
-});
+function apps(prefix: string) {
+    const v1js = new MyFunctionApp(`${prefix}v1js`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer,
+        appInsights,
+        path: "v1/js",
+        version: "~1"
+    });
 
-const v2js = new MyFunctionApp("v2js", {
-    resourceGroup,
-    storageAccount,
-    storageContainer,
-    path: "v2/js",
-    version: "beta"
-});
+    const v1dotnet = new MyFunctionApp(`${prefix}v1dotnet`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer,
+        path: "v1/dotnet/bin/Debug/net461/publish",
+        appInsights,
+        version: "~1"
+    });
 
-const v2dotnet = new MyFunctionApp("v2dotnet", {
-    resourceGroup,
-    storageAccount,
-    storageContainer,
-    path: "v2/dotnet/bin/Debug/netstandard2.0/publish",
-    version: "beta"
-});
+    const v2js = new MyFunctionApp(`${prefix}v2js`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer,
+        appInsights,
+        path: "v2/js",
+        version: "beta"
+    });
 
-const v2java = new MyFunctionApp("v2java", {
-    resourceGroup,
-    storageAccount,
-    storageContainer,
-    path: "v2/java/target/azure-functions/v2java",
-    version: "beta"
-});
+    const v2dotnet = new MyFunctionApp(`${prefix}v2dotnet`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer,
+        appInsights,
+        path: "v2/dotnet/bin/Debug/netstandard2.0/publish",
+        version: "beta"
+    });
 
-exports.v1js = v1js.url;
-exports.v1dotnet = v1dotnet.url;
-exports.v2js = v2js.url;
-exports.v2dotnet = v2dotnet.url;
-exports.v2java = v2java.url;
+    const v2java = new MyFunctionApp(`${prefix}v2java`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer,
+        appInsights,
+        path: "v2/java/target/azure-functions/v2java",
+        version: "beta"
+    });
+
+    return {
+        v1js: v1js.url,
+        v1dotnet: v1dotnet.url,
+        v2js: v2js.url,
+        v2dotnet: v2dotnet.url,
+        v2java: v2java.url
+    };
+}
+
+exports.coldStarts = apps("");
+exports.fire = apps("fire");
