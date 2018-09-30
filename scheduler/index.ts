@@ -3,7 +3,7 @@ import * as azure from "@pulumi/azure";
 import * as cloud from "@pulumi/cloud";
 import * as serverless from "@pulumi/azure-serverless";
 import * as r from "request";
-
+import { signedBlobReadUrl } from "../azure/util";
 
 const name = pulumi.getStack();
 
@@ -98,26 +98,26 @@ const queue = new azure.storage.Queue("fire", {
     resourceGroupName: resourceGroup.name
 })
 
-const subscription = serverless.storage.onQueueMessage("firesub", storageAccount, {
-    queueName: queue.name,
-    resourceGroup: resourceGroup,
-    func: async (context, data) => {
-        const http = require("http");
-        const httpAgent = new http.Agent({ keepAlive: true });
+// const subscription = serverless.storage.onQueueMessage("firesub", storageAccount, {
+//     queueName: queue.name,
+//     resourceGroup: resourceGroup,
+//     func: async (context, data) => {
+//         const http = require("http");
+//         const httpAgent = new http.Agent({ keepAlive: true });
 
-        const request = require("request");
-        const appInsights = require("applicationinsights");
-        appInsights.setup(appInsightsKey).setUseDiskRetryCaching(false);
-        const client = appInsights.defaultClient;
+//         const request = require("request");
+//         const appInsights = require("applicationinsights");
+//         appInsights.setup(appInsightsKey).setUseDiskRetryCaching(false);
+//         const client = appInsights.defaultClient;
     
-        const text = data.toString('utf8');
-        const message: FireMessage = JSON.parse(text);
-        for (let i = 0; i < message.times; i++) {
-            const promises = new Array(message.parallel).fill(0).map(_ => ping(request, httpAgent, client, "Fire", message.url));
-            await Promise.all(promises);
-        }
-    }
-});
+//         const text = data.toString('utf8');
+//         const message: FireMessage = JSON.parse(text);
+//         for (let i = 0; i < message.times; i++) {
+//             const promises = new Array(message.parallel).fill(0).map(_ => ping(request, httpAgent, client, "Fire", message.url));
+//             await Promise.all(promises);
+//         }
+//     }
+// });
 
 //const topic = new cloud.Topic("fire");
 // topic.subscribe("dofire", async (item: FireMessage) => {
@@ -144,7 +144,7 @@ cloud.timer.cron("fireschedulev2", "*/10 00-10 * * * *", async () => {
 
     const message: FireMessage = {
         url: "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet", 
-        parallel: Math.floor(11 / Math.pow(Math.abs(5.5-minutes), 1.5)),
+        parallel: Math.ceil(5 / Math.pow(Math.abs(5.5-minutes), 1.25)),
         times: 20,
         timestamp: new Date().toISOString()
     };
@@ -165,7 +165,7 @@ cloud.timer.cron("fireschedulev1", "*/10 30-40 * * * *", async () => {
 
     const message: FireMessage = {
         url: "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet", 
-        parallel: Math.floor(11 / Math.pow(Math.abs(35.5-minutes), 1.5)),
+        parallel: Math.ceil(5 / Math.pow(Math.abs(35.5-minutes), 1.25)),
         times: 20,
         timestamp: new Date().toISOString()
     };
@@ -173,6 +173,59 @@ cloud.timer.cron("fireschedulev1", "*/10 30-40 * * * *", async () => {
     for (let i = 0; i < hours; i++) {
         await sendToQueue(queueSvc, message);
     }
+});
+
+//----------- MONITOR C#
+
+const resourceGroupArgs = {
+    resourceGroupName: resourceGroup.name,
+    location: resourceGroup.location,
+};
+
+const appServicePlan = new azure.appservice.Plan("cbcsmonitor", {
+    ...resourceGroupArgs,
+
+    kind: "FunctionApp",
+
+    // https://social.msdn.microsoft.com/Forums/azure/en-US/665c365d-2b86-4a77-8cea-72ccffef216c
+    sku: {
+        tier: "Dynamic",
+        size: "Y1",
+    },
+});
+
+const storageContainer = new azure.storage.Container("cbcsmonitor-c", {
+    resourceGroupName: resourceGroup.name,
+    storageAccountName: storageAccount.name,
+    containerAccessType: "private",
+});
+        
+const blob = new azure.storage.ZipBlob(`${name}-b`, {
+    resourceGroupName: resourceGroup.name,
+    storageAccountName: storageAccount.name,
+    storageContainerName: storageContainer.name,
+    type: "block",
+
+    content: new pulumi.asset.FileArchive("../azure/monitor/bin/Debug/netstandard2.0/publish")
+});
+
+const codeBlobUrl = signedBlobReadUrl(blob, storageAccount, storageContainer);
+
+const csharpmonitor = new azure.appservice.FunctionApp("cbcsmonitor-fa", {
+    ...resourceGroupArgs,
+
+    appServicePlanId: appServicePlan.id,
+    storageConnectionString: storageAccount.primaryConnectionString,
+
+    appSettings: {
+        "WEBSITE_RUN_FROM_ZIP": codeBlobUrl,
+        "FUNCTIONS_EXTENSION_VERSION": "~2",
+        "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
+        "ApplicationInsights:InstrumentationKey": appInsightsKey,
+        "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey
+    },
+
+    version: "beta"
 });
 
 

@@ -1,0 +1,14 @@
+{
+  "generatedBy": "Microsoft.NET.Sdk.Functions-1.0.22",
+  "configurationSource": "attributes",
+  "bindings": [
+    {
+      "type": "queueTrigger",
+      "queueName": "fire9f99b255",
+      "name": "message"
+    }
+  ],
+  "disabled": false,
+  "scriptFile": "../bin/monitor.dll",
+  "entryPoint": "CloudBench.Monitor.Run"
+}
