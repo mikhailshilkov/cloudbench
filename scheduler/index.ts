@@ -40,20 +40,20 @@ function ping(request: any, httpAgent: any, client: any, metricName: string, url
     });
 }
 
-function sendToQueue(queueSvc: any, message: any) {
-    return new Promise(function(resolve, reject){
-        const json = JSON.stringify(message);
-        queueSvc.createMessage(queue.name.get(), Buffer.from(json).toString('base64'), 
-            (error: any, results: any, response: any) => {
-                if(error){
-                reject(error);
-                } else {
-                    console.log("Sent a message " + json);
-                    resolve();
-                }            
-        });
-    });
-}
+// function sendToQueue(queueSvc: any, message: any) {
+//     return new Promise(function(resolve, reject){
+//         const json = JSON.stringify(message);
+//         queueSvc.createMessage(queue.name.get(), Buffer.from(json).toString('base64'), 
+//             (error: any, results: any, response: any) => {
+//                 if(error){
+//                 reject(error);
+//                 } else {
+//                     console.log("Sent a message " + json);
+//                     resolve();
+//                 }            
+//         });
+//     });
+// }
 cloud.timer.cron("scheduler", "0 */30 * * * *", async () => {
     const http = require("http");
     const httpAgent = new http.Agent({ keepAlive: true });
@@ -74,12 +74,12 @@ cloud.timer.cron("scheduler", "0 */30 * * * *", async () => {
     await pingCold("https://v2java-facf684788.azurewebsites.net/api/v2java");
 });
 
-interface FireMessage {
-    url: string;
-    parallel: number;
-    times: number;
-    timestamp: string;
-}
+// interface FireMessage {
+//     url: string;
+//     parallel: number;
+//     times: number;
+//     timestamp: string;
+// }
 
 const resourceGroup = new azure.core.ResourceGroup("cloudbench", {
     location: "West Europe",
@@ -93,10 +93,10 @@ const storageAccount = new azure.storage.Account("cloudbenchsa", {
     accountTier: "Standard",
 });
 
-const queue = new azure.storage.Queue("fire", {
-    storageAccountName: storageAccount.name,
-    resourceGroupName: resourceGroup.name
-})
+// const queue = new azure.storage.Queue("fire", {
+//     storageAccountName: storageAccount.name,
+//     resourceGroupName: resourceGroup.name
+// })
 
 // const subscription = serverless.storage.onQueueMessage("firesub", storageAccount, {
 //     queueName: queue.name,
@@ -128,52 +128,52 @@ const queue = new azure.storage.Queue("fire", {
 
 
 
-cloud.timer.cron("fireschedulev2", "*/10 00-10 * * * *", async () => {
-    // + v1dotnet: "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet"
-    // + v1js    : "https://firev1js-fa999eab36.azurewebsites.net/api/v1js"
-    // + v2dotnet: "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet"
-    // + v2java  : "https://firev2java-fa76044f0f.azurewebsites.net/api/v2java"
-    // + v2js    : "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js"
+// cloud.timer.cron("fireschedulev2", "*/10 00-10 * * * *", async () => {
+//     // + v1dotnet: "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet"
+//     // + v1js    : "https://firev1js-fa999eab36.azurewebsites.net/api/v1js"
+//     // + v2dotnet: "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet"
+//     // + v2java  : "https://firev2java-fa76044f0f.azurewebsites.net/api/v2java"
+//     // + v2js    : "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js"
 
-    const storage = require("azure-storage");
+//     const storage = require("azure-storage");
 
-    var queueSvc = storage.createQueueService(storageAccount.primaryConnectionString.get());
+//     var queueSvc = storage.createQueueService(storageAccount.primaryConnectionString.get());
 
-    const hours = new Date().getHours();
-    const minutes = new Date().getMinutes();
+//     const hours = new Date().getHours();
+//     const minutes = new Date().getMinutes();
 
-    const message: FireMessage = {
-        url: "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet", 
-        parallel: Math.ceil(5 / Math.pow(Math.abs(5.5-minutes), 1.25)),
-        times: 20,
-        timestamp: new Date().toISOString()
-    };
+//     const message: FireMessage = {
+//         url: "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet", 
+//         parallel: Math.ceil(5 / Math.pow(Math.abs(5.5-minutes), 1.25)),
+//         times: 20,
+//         timestamp: new Date().toISOString()
+//     };
     
-    for (let i = 0; i < hours; i++) {
-        await sendToQueue(queueSvc, message);
-    }
-//    topic.publish();
-});
+//     for (let i = 0; i < hours; i++) {
+//         await sendToQueue(queueSvc, message);
+//     }
+// //    topic.publish();
+// });
 
-cloud.timer.cron("fireschedulev1", "*/10 30-40 * * * *", async () => {
-    const storage = require("azure-storage");
+// cloud.timer.cron("fireschedulev1", "*/10 30-40 * * * *", async () => {
+//     const storage = require("azure-storage");
 
-    var queueSvc = storage.createQueueService(storageAccount.primaryConnectionString.get());
+//     var queueSvc = storage.createQueueService(storageAccount.primaryConnectionString.get());
 
-    const hours = new Date().getHours();
-    const minutes = new Date().getMinutes();
+//     const hours = new Date().getHours();
+//     const minutes = new Date().getMinutes();
 
-    const message: FireMessage = {
-        url: "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet", 
-        parallel: Math.ceil(5 / Math.pow(Math.abs(35.5-minutes), 1.25)),
-        times: 20,
-        timestamp: new Date().toISOString()
-    };
+//     const message: FireMessage = {
+//         url: "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet", 
+//         parallel: Math.ceil(5 / Math.pow(Math.abs(35.5-minutes), 1.25)),
+//         times: 20,
+//         timestamp: new Date().toISOString()
+//     };
     
-    for (let i = 0; i < hours; i++) {
-        await sendToQueue(queueSvc, message);
-    }
-});
+//     for (let i = 0; i < hours; i++) {
+//         await sendToQueue(queueSvc, message);
+//     }
+// });
 
 //----------- MONITOR C#
 
@@ -206,7 +206,7 @@ const blob = new azure.storage.ZipBlob(`${name}-b`, {
     storageContainerName: storageContainer.name,
     type: "block",
 
-    content: new pulumi.asset.FileArchive("../azure/monitor/bin/Debug/netstandard2.0/publish")
+    content: new pulumi.asset.FileArchive("../azure/monitor/timer/bin/Debug/netstandard2.0/publish")
 });
 
 const codeBlobUrl = signedBlobReadUrl(blob, storageAccount, storageContainer);
@@ -222,7 +222,8 @@ const csharpmonitor = new azure.appservice.FunctionApp("cbcsmonitor-fa", {
         "FUNCTIONS_EXTENSION_VERSION": "~2",
         "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
         "ApplicationInsights:InstrumentationKey": appInsightsKey,
-        "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey
+        "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
+        "TargetUrl": "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet"
     },
 
     version: "beta"

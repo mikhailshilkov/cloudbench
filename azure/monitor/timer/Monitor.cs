@@ -22,7 +22,7 @@ namespace CloudBench
         public static async Task Run([TimerTrigger("0 0 * * * *")] TimerInfo info, ILogger log, CancellationToken token)
         {
             log.LogInformation($"C# Timer trigger function running at {info}");
-            var url = Environment.GetEnvironmentVariable("TargetUrl");
+            var url = Environment.GetEnvironmentVariable("TargetUrl", EnvironmentVariableTarget.Process);
 
             var overallTime = Stopwatch.StartNew();
 
@@ -40,7 +40,7 @@ namespace CloudBench
                     {
                         var counter = Interlocked.Read(ref ActiveRequests);
                         if (counter > 200) break;
-                        Ping("").ContinueWith(OnAsyncMethodFailed, token, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                        Ping(url).ContinueWith(OnAsyncMethodFailed, token, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
                         totalCount ++;
                     }
                 }
