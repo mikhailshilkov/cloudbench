@@ -105,7 +105,7 @@ function apps(prefix: string) {
         storageAccount,
         storageContainer,
         appInsights,
-        path: "v1/js",
+        path: "http/v1/js",
         version: "~1"
     });
 
@@ -113,7 +113,7 @@ function apps(prefix: string) {
         resourceGroup,
         storageAccount,
         storageContainer,
-        path: "v1/dotnet/bin/Debug/net461/publish",
+        path: "http/v1/dotnet/bin/Debug/net461/publish",
         appInsights,
         version: "~1"
     });
@@ -123,7 +123,7 @@ function apps(prefix: string) {
         storageAccount,
         storageContainer,
         appInsights,
-        path: "v2/js",
+        path: "http/v2/js",
         version: "beta"
     });
 
@@ -132,7 +132,7 @@ function apps(prefix: string) {
         storageAccount,
         storageContainer,
         appInsights,
-        path: "v2/dotnet/bin/Debug/netstandard2.0/publish",
+        path: "http/v2/dotnet/bin/Debug/netstandard2.0/publish",
         version: "beta"
     });
 
@@ -141,7 +141,7 @@ function apps(prefix: string) {
         storageAccount,
         storageContainer,
         appInsights,
-        path: "v2/java/target/azure-functions/v2java",
+        path: "http/v2/java/target/azure-functions/v2java",
         version: "beta"
     });
 

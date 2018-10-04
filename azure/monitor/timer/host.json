@@ -1,8 +1,4 @@
 {
-    "version": "2.0"
-    "extensions": {
-        "queues": {
-            "batchSize": 5
-        }
-    }
+    "version": "2.0",
+    "functionTimeout": "00:10:00"
 }

@@ -40,20 +40,6 @@ function ping(request: any, httpAgent: any, client: any, metricName: string, url
     });
 }
 
-// function sendToQueue(queueSvc: any, message: any) {
-//     return new Promise(function(resolve, reject){
-//         const json = JSON.stringify(message);
-//         queueSvc.createMessage(queue.name.get(), Buffer.from(json).toString('base64'), 
-//             (error: any, results: any, response: any) => {
-//                 if(error){
-//                 reject(error);
-//                 } else {
-//                     console.log("Sent a message " + json);
-//                     resolve();
-//                 }            
-//         });
-//     });
-// }
 cloud.timer.cron("scheduler", "0 */30 * * * *", async () => {
     const http = require("http");
     const httpAgent = new http.Agent({ keepAlive: true });
@@ -211,23 +197,105 @@ const blob = new azure.storage.ZipBlob(`${name}-b`, {
 
 const codeBlobUrl = signedBlobReadUrl(blob, storageAccount, storageContainer);
 
-const csharpmonitor = new azure.appservice.FunctionApp("cbcsmonitor-fa", {
+const urls = ["https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet",
+    "https://firev1js-fa999eab36.azurewebsites.net/api/v1js",
+    "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet",
+    "https://firev2java-fa76044f0f.azurewebsites.net/api/v2java",
+    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js"];
+
+function addMonitor(minute: number) { 
+    new azure.appservice.FunctionApp(`cbcsmonitor-fa${minute !== 0 ? minute.toString() : ""}`, {
+        ...resourceGroupArgs,
+
+        appServicePlanId: appServicePlan.id,
+        storageConnectionString: storageAccount.primaryConnectionString,
+
+        appSettings: {
+            "WEBSITE_RUN_FROM_ZIP": codeBlobUrl,
+            "FUNCTIONS_EXTENSION_VERSION": "~2",
+            "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
+            "ApplicationInsights:InstrumentationKey": appInsightsKey,
+            "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
+            "Schedule": `0 ${minute} * * * *`,
+            "LinearK": "10",
+            "QuadraticK": "0.5",
+            "TargetUrl": urls.join(",")
+        },
+
+        version: "beta"
+    });
+}
+
+addMonitor(0);
+addMonitor(2);
+addMonitor(4);
+addMonitor(6);
+addMonitor(8);
+
+//----------- QUEUE PAUSE PROCESSOR C#
+
+const queue = new azure.storage.Queue("queuepause", {
+    storageAccountName: storageAccount.name,
+    resourceGroupName: resourceGroup.name
+});
+
+const blobQueuePause = new azure.storage.ZipBlob("cbcsqpause-b", {
+    resourceGroupName: resourceGroup.name,
+    storageAccountName: storageAccount.name,
+    storageContainerName: storageContainer.name,
+    type: "block",
+
+    content: new pulumi.asset.FileArchive("../azure/queue/v2/dotnet/bin/Debug/netstandard2.0/publish")
+});
+
+const codeBlobQueuePauseUrl = signedBlobReadUrl(blobQueuePause, storageAccount, storageContainer);
+
+new azure.appservice.FunctionApp(`cbcsqpause-fa`, {
     ...resourceGroupArgs,
 
     appServicePlanId: appServicePlan.id,
     storageConnectionString: storageAccount.primaryConnectionString,
 
     appSettings: {
-        "WEBSITE_RUN_FROM_ZIP": codeBlobUrl,
+        "WEBSITE_RUN_FROM_ZIP": codeBlobQueuePauseUrl,
         "FUNCTIONS_EXTENSION_VERSION": "~2",
         "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
         "ApplicationInsights:InstrumentationKey": appInsightsKey,
         "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
-        "TargetUrl": "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet"
+        "queuename": queue.name
     },
 
     version: "beta"
 });
+
+function sendToQueue(queueSvc: any, message: any) {
+    return new Promise(function(resolve, reject){
+        const json = JSON.stringify(message);
+        queueSvc.createMessage(queue.name.get(), Buffer.from(json).toString('base64'), 
+            (error: any, results: any, response: any) => {
+                if(error){
+                reject(error);
+                } else {
+                    resolve();
+                }            
+        });
+    });
+}
+
+// cloud.timer.cron("cbqpauseschedule", "0 15 * * * *", async () => {
+//     const storage = require("azure-storage");
+
+//     var queueSvc = storage.createQueueService(storageAccount.primaryConnectionString.get());
+
+//     const hours = new Date().getHours();
+
+//     const count = hours * 100;
+    
+//     for (let i = 0; i < count; i++) {
+//         const promises = new Array(10).fill(0).map(_ => sendToQueue(queueSvc, i));
+//         await Promise.all(promises);
+//     }
+// });
 
 
 //export let endpoint = fn.endpoint;

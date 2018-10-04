@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,21 +21,28 @@ namespace CloudBench
         }
 
         [FunctionName("TimerFire")]
-        public static async Task Run([TimerTrigger("0 0 * * * *")] TimerInfo info, ILogger log, CancellationToken token)
+        public static async Task Run([TimerTrigger("%Schedule%")] TimerInfo info, ILogger log, CancellationToken token)
         {
             log.LogInformation($"C# Timer trigger function running at {info}");
-            var url = Environment.GetEnvironmentVariable("TargetUrl", EnvironmentVariableTarget.Process);
+            var urls = 
+                Environment
+                    .GetEnvironmentVariable("TargetUrl", EnvironmentVariableTarget.Process)
+                    .Split(',');
+            var url = urls[DateTime.UtcNow.Hour % urls.Length];
+            
+            var a = Convert.ToInt32(Environment.GetEnvironmentVariable("LinearK", EnvironmentVariableTarget.Process));
+            var b = Convert.ToDouble(Environment.GetEnvironmentVariable("QuadraticK", EnvironmentVariableTarget.Process), CultureInfo.InvariantCulture);
 
             var overallTime = Stopwatch.StartNew();
 
             var totalCount = 0;
 
-            while (overallTime.Elapsed < TimeSpan.FromSeconds(5 * 60 - 1))
+            while (overallTime.Elapsed < TimeSpan.FromSeconds(10 * 60 - 1))
             {
                 var secondsPassed = overallTime.Elapsed.TotalSeconds;
-                var plannedCount = secondsPassed * 10 + (secondsPassed * secondsPassed);
+                var plannedCount = (int)(a * secondsPassed + b * (secondsPassed * secondsPassed));
 
-                var missingCount = (int)(plannedCount - totalCount);
+                var missingCount = plannedCount - totalCount;
                 if (missingCount > 0)
                 {
                     for (int i = 0; i < missingCount; i++) 
@@ -56,9 +65,19 @@ namespace CloudBench
                 Interlocked.Increment(ref ActiveRequests);
                 var stopwatch = Stopwatch.StartNew();
                 var response = await client.GetAsync(url);
+                string name;
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    var body = await response.Content.ReadAsStringAsync();
+                    name = $"CloudBench_Fire_{body}";
+                }
+                else
+                {
+                    var hash = url.Split('/').Last();
+                    name = $"CloudBench_Fire_{response.StatusCode}_{hash}";
+
+                }
                 var duration = stopwatch.ElapsedMilliseconds;
-                var body = await response.Content.ReadAsStringAsync();
-                var name = $"CloudBench_Fire_{body}";
                 telemetry.TrackMetric(name, duration);
             }
             catch (Exception ex)
