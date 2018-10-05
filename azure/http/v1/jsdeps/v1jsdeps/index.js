@@ -1,0 +1,14 @@
+const Promise = require('bluebird');
+const _ = require('lodash');
+const aws = require('aws-sdk');
+
+module.exports = function(context) {
+    context.bindings.res = { 
+      status: 200, 
+      body: 'AzureFunction_V1_JSDeps',
+      headers: {
+            "Content-Type": "text/plain"
+      } 
+    }; 
+    context.done();
+};                                 

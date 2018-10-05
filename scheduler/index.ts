@@ -240,11 +240,11 @@ function addMonitor(minute: number) {
     });
 }
 
-addMonitor(0);
-addMonitor(2);
-addMonitor(4);
-addMonitor(6);
-addMonitor(8);
+//addMonitor(0);
+//addMonitor(2);
+//addMonitor(4);
+//addMonitor(6);
+//addMonitor(8);
 
 //----------- QUEUE PAUSE PROCESSOR C#
 
