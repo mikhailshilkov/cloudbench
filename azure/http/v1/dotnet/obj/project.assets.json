@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     ".NETFramework,Version=v4.6.1": {
+      "BCrypt.Net/0.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net35/BCrypt.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net35/BCrypt.Net.dll": {}
+        }
+      },
       "Microsoft.AspNet.WebApi.Client/5.2.3": {
         "type": "package",
         "dependencies": {
@@ -978,6 +987,17 @@
     }
   },
   "libraries": {
+    "BCrypt.Net/0.1.0": {
+      "sha512": "sST2w361Dxt9GGMfpOTiK50wXGV64Ybb1hiX3xjEWnhVYZNF43NuySGwADJa7X1R+bA53NsFR+tuDxcYiJeIOA==",
+      "type": "package",
+      "path": "bcrypt.net/0.1.0",
+      "files": [
+        "bcrypt.net.0.1.0.nupkg.sha512",
+        "bcrypt.net.nuspec",
+        "lib/net35/BCrypt.Net.XML",
+        "lib/net35/BCrypt.Net.dll"
+      ]
+    },
     "Microsoft.AspNet.WebApi.Client/5.2.3": {
       "sha512": "3kiI8peSXbXHDDrRuo+QaX0iCEVRe0nvn2dBDRw656uPX32UalbBlSIDUDlJxu05eau4tnuhsikiUuugvvoUoQ==",
       "type": "package",
@@ -4002,6 +4022,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETFramework,Version=v4.6.1": [
+      "Bcrypt.Net >= 0.1.0",
       "Microsoft.NET.Sdk.Functions >= 1.0.22"
     ]
   },
@@ -4012,11 +4033,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Work\\cloudbench\\azure\\v1\\dotnet\\v1dotnet.csproj",
+      "projectUniqueName": "C:\\Work\\cloudbench\\azure\\http\\v1\\dotnet\\v1dotnet.csproj",
       "projectName": "v1dotnet",
-      "projectPath": "C:\\Work\\cloudbench\\azure\\v1\\dotnet\\v1dotnet.csproj",
+      "projectPath": "C:\\Work\\cloudbench\\azure\\http\\v1\\dotnet\\v1dotnet.csproj",
       "packagesPath": "C:\\Users\\mshilkov\\.nuget\\packages\\",
-      "outputPath": "C:\\Work\\cloudbench\\azure\\v1\\dotnet\\obj\\",
+      "outputPath": "C:\\Work\\cloudbench\\azure\\http\\v1\\dotnet\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -4046,6 +4067,10 @@
     "frameworks": {
       "net461": {
         "dependencies": {
+          "Bcrypt.Net": {
+            "target": "Package",
+            "version": "[0.1.0, )"
+          },
           "Microsoft.NET.Sdk.Functions": {
             "target": "Package",
             "version": "[1.0.22, )"

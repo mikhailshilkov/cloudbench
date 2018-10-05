@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     ".NETStandard,Version=v2.0": {
+      "BCrypt.Net/0.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net35/BCrypt.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net35/BCrypt.Net.dll": {}
+        }
+      },
       "Microsoft.AspNet.WebApi.Client/5.2.4": {
         "type": "package",
         "dependencies": {
@@ -1781,6 +1790,17 @@
     }
   },
   "libraries": {
+    "BCrypt.Net/0.1.0": {
+      "sha512": "sST2w361Dxt9GGMfpOTiK50wXGV64Ybb1hiX3xjEWnhVYZNF43NuySGwADJa7X1R+bA53NsFR+tuDxcYiJeIOA==",
+      "type": "package",
+      "path": "bcrypt.net/0.1.0",
+      "files": [
+        "bcrypt.net.0.1.0.nupkg.sha512",
+        "bcrypt.net.nuspec",
+        "lib/net35/BCrypt.Net.XML",
+        "lib/net35/BCrypt.Net.dll"
+      ]
+    },
     "Microsoft.AspNet.WebApi.Client/5.2.4": {
       "sha512": "OdBVC2bQWkf9qDd7Mt07ev4SwIdu6VmLBMTWC0D5cOP/HWSXyv/77otwtXVrAo42duNjvXOjzjP5oOI9m1+DTQ==",
       "type": "package",
@@ -5842,6 +5862,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
+      "BCrypt.Net >= 0.1.0",
       "Microsoft.NET.Sdk.Functions >= 1.0.22",
       "NETStandard.Library >= 2.0.3"
     ]
@@ -5853,11 +5874,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Work\\cloudbench\\azure\\v2\\dotnet\\v2.csproj",
+      "projectUniqueName": "C:\\Work\\cloudbench\\azure\\http\\v2\\dotnet\\v2.csproj",
       "projectName": "v2",
-      "projectPath": "C:\\Work\\cloudbench\\azure\\v2\\dotnet\\v2.csproj",
+      "projectPath": "C:\\Work\\cloudbench\\azure\\http\\v2\\dotnet\\v2.csproj",
       "packagesPath": "C:\\Users\\mshilkov\\.nuget\\packages\\",
-      "outputPath": "C:\\Work\\cloudbench\\azure\\v2\\dotnet\\obj\\",
+      "outputPath": "C:\\Work\\cloudbench\\azure\\http\\v2\\dotnet\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -5887,6 +5908,10 @@
     "frameworks": {
       "netstandard2.0": {
         "dependencies": {
+          "BCrypt.Net": {
+            "target": "Package",
+            "version": "[0.1.0, )"
+          },
           "Microsoft.NET.Sdk.Functions": {
             "target": "Package",
             "version": "[1.0.22, )"
@@ -5905,5 +5930,17 @@
         "warn": true
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'BCrypt.Net 0.1.0' was restored using '.NETFramework,Version=v4.6.1' instead of the project target framework '.NETStandard,Version=v2.0'. This package may not be fully compatible with your project.",
+      "libraryId": "BCrypt.Net",
+      "targetGraphs": [
+        ".NETStandard,Version=v2.0"
+      ]
+    }
+  ]
 }

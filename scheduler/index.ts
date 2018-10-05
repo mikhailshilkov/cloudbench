@@ -197,11 +197,25 @@ const blob = new azure.storage.ZipBlob(`${name}-b`, {
 
 const codeBlobUrl = signedBlobReadUrl(blob, storageAccount, storageContainer);
 
-const urls = ["https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet",
+const urls = [
+    "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet",
+    "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnetpause",
+    "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnetbcrypt",
+
     "https://firev1js-fa999eab36.azurewebsites.net/api/v1js",
+    "https://firev1js-fa999eab36.azurewebsites.net/api/v1js_pause",
+    "https://firev1js-fa999eab36.azurewebsites.net/api/v1js_bcrypt",
+
     "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet",
+    "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnetpause",
+    "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnetbcrypt",
+    
     "https://firev2java-fa76044f0f.azurewebsites.net/api/v2java",
-    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js"];
+    "https://firev2java-fa76044f0f.azurewebsites.net/api/v2javapause",
+
+    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js",
+    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_pause",
+    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_bcrypt"];
 
 function addMonitor(minute: number) { 
     new azure.appservice.FunctionApp(`cbcsmonitor-fa${minute !== 0 ? minute.toString() : ""}`, {
