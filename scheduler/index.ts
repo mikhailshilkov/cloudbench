@@ -5,7 +5,7 @@ import * as serverless from "@pulumi/azure-serverless";
 import * as r from "request";
 import { signedBlobReadUrl } from "../azure/util";
 
-const name = pulumi.getStack();
+const name = pulumi.getStack().substr(0, 8);
 
 const config = new pulumi.Config(name);
 const appInsightsKey = config.get("appInsightsKey");
@@ -40,25 +40,30 @@ function ping(request: any, httpAgent: any, client: any, metricName: string, url
     });
 }
 
-cloud.timer.cron("scheduler", "0 */30 * * * *", async () => {
-    const http = require("http");
-    const httpAgent = new http.Agent({ keepAlive: true });
+// cloud.timer.cron("scheduler", "0 */30 * * * *", async () => {
+//     const http = require("http");
+//     const httpAgent = new http.Agent({ keepAlive: true });
 
-    const request = require("request");
-    const appInsights = require("applicationinsights");
-    appInsights.setup(appInsightsKey).setUseDiskRetryCaching(false);
-    const client = appInsights.defaultClient;
+//     const request = require("request");
+//     const appInsights = require("applicationinsights");
+//     appInsights.setup(appInsightsKey).setUseDiskRetryCaching(false);
+//     const client = appInsights.defaultClient;
 
-    function pingCold(url: string) {
-        return ping(request, httpAgent, client, "ColdStart", url);
-    }
+//     function pingCold(url: string) {
+//         return ping(request, httpAgent, client, "ColdStart", url);
+//     }
 
-    await pingCold("https://v1js-fad886ed8e.azurewebsites.net/api/v1js");
-    await pingCold("https://v1dotnet-faf61b2cf5.azurewebsites.net/api/v1dotnet");
-    await pingCold("https://v2js-fab09dff35.azurewebsites.net/api/v2js");
-    await pingCold("https://v2dotnet-fa249cdc28.azurewebsites.net/api/v2dotnet");
-    await pingCold("https://v2java-facf684788.azurewebsites.net/api/v2java");
-});
+//     // await pingCold("https://v1js-fad886ed8e.azurewebsites.net/api/v1js");
+//     // await pingCold("https://v1dotnet-faf61b2cf5.azurewebsites.net/api/v1dotnet");
+//     // await pingCold("https://v2js-fab09dff35.azurewebsites.net/api/v2js");
+//     // await pingCold("https://v2dotnet-fa249cdc28.azurewebsites.net/api/v2dotnet");
+//     // await pingCold("https://v2java-facf684788.azurewebsites.net/api/v2java");
+
+//     await pingCold("https://v1jsdeps-fafda8719c.azurewebsites.net/api/v1jsdeps");
+//     await pingCold("https://v1jsdepsmax-fa7e68e06a.azurewebsites.net/api/v1jsdepsmax");
+//     await pingCold("https://v2jsdeps-facb1159b3.azurewebsites.net/api/v2jsdeps");
+//     await pingCold("https://v2jsdepsmax-fa240b9038.azurewebsites.net/api/v2jsdepsmax");
+// });
 
 // interface FireMessage {
 //     url: string;
@@ -197,25 +202,32 @@ const blob = new azure.storage.ZipBlob(`${name}-b`, {
 
 const codeBlobUrl = signedBlobReadUrl(blob, storageAccount, storageContainer);
 
-const urls = [
-    "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet",
-    "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnetpause",
-    "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnetbcrypt",
+// const urls = [
+//     "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnet",
+//     "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnetpause",
+//     "https://firev1dotnet-faa5972405.azurewebsites.net/api/v1dotnetbcrypt",
 
-    "https://firev1js-fa999eab36.azurewebsites.net/api/v1js",
-    "https://firev1js-fa999eab36.azurewebsites.net/api/v1js_pause",
-    "https://firev1js-fa999eab36.azurewebsites.net/api/v1js_bcrypt",
+//     "https://firev1js-fa999eab36.azurewebsites.net/api/v1js",
+//     "https://firev1js-fa999eab36.azurewebsites.net/api/v1js_pause",
+//     "https://firev1js-fa999eab36.azurewebsites.net/api/v1js_bcrypt",
 
-    "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet",
-    "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnetpause",
-    "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnetbcrypt",
+//     "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnet",
+//     "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnetpause",
+//     "https://firev2dotnet-faea395a1f.azurewebsites.net/api/v2dotnetbcrypt",
     
-    "https://firev2java-fa76044f0f.azurewebsites.net/api/v2java",
-    "https://firev2java-fa76044f0f.azurewebsites.net/api/v2javapause",
+//     "https://firev2java-fa76044f0f.azurewebsites.net/api/v2java",
+//     "https://firev2java-fa76044f0f.azurewebsites.net/api/v2javapause",
 
-    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js",
-    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_pause",
-    "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_bcrypt"];
+//     "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js",
+//     "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_pause",
+//     "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_bcrypt"];
+
+const urls = [
+    "https://firev1dotnet-fa99d17b8c.azurewebsites.net/api/v1dotnetbcrypt",
+    "https://firev2dotnet-fab6c65e50.azurewebsites.net/api/v2dotnetbcrypt",
+    "https://firev1js-fa917b8d2b.azurewebsites.net/api/v1js_bcrypt",
+    "https://firev2js-fad0af265e.azurewebsites.net/api/v2js_bcrypt"
+];
 
 function addMonitor(minute: number) { 
     new azure.appservice.FunctionApp(`cbcsmonitor-fa${minute !== 0 ? minute.toString() : ""}`, {
@@ -230,7 +242,7 @@ function addMonitor(minute: number) {
             "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
             "ApplicationInsights:InstrumentationKey": appInsightsKey,
             "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
-            "Schedule": `0 ${minute} * * * *`,
+            "Schedule": `0 ${minute} 0-3 * * *`,
             "LinearK": "10",
             "QuadraticK": "0.5",
             "TargetUrl": urls.join(",")
@@ -240,61 +252,74 @@ function addMonitor(minute: number) {
     });
 }
 
-//addMonitor(0);
-//addMonitor(2);
-//addMonitor(4);
-//addMonitor(6);
-//addMonitor(8);
+// addMonitor(0);
+// addMonitor(2);
+// addMonitor(4);
+// addMonitor(6);
+// addMonitor(8);
 
 //----------- QUEUE PAUSE PROCESSOR C#
 
-const queue = new azure.storage.Queue("queuepause", {
-    storageAccountName: storageAccount.name,
-    resourceGroupName: resourceGroup.name
-});
+function addQueue(name: string, path: string, version: string) {
+    const queuePause = new azure.storage.Queue(`queuepause${name}`, {
+        storageAccountName: storageAccount.name,
+        resourceGroupName: resourceGroup.name
+    });
 
-const blobQueuePause = new azure.storage.ZipBlob("cbcsqpause-b", {
-    resourceGroupName: resourceGroup.name,
-    storageAccountName: storageAccount.name,
-    storageContainerName: storageContainer.name,
-    type: "block",
+    const queueBcrypt = new azure.storage.Queue(`queuebcrypt${name}`, {
+        storageAccountName: storageAccount.name,
+        resourceGroupName: resourceGroup.name
+    });
 
-    content: new pulumi.asset.FileArchive("../azure/queue/v2/dotnet/bin/Debug/netstandard2.0/publish")
-});
+    const blobQueuePause = new azure.storage.ZipBlob(`cbcsq${name}-b`, {
+        resourceGroupName: resourceGroup.name,
+        storageAccountName: storageAccount.name,
+        storageContainerName: storageContainer.name,
+        type: "block",
 
-const codeBlobQueuePauseUrl = signedBlobReadUrl(blobQueuePause, storageAccount, storageContainer);
+        content: new pulumi.asset.FileArchive("../azure/queue/" + path)
+    });
 
-new azure.appservice.FunctionApp(`cbcsqpause-fa`, {
-    ...resourceGroupArgs,
+    const codeBlobQueueUrl = signedBlobReadUrl(blobQueuePause, storageAccount, storageContainer);
 
-    appServicePlanId: appServicePlan.id,
-    storageConnectionString: storageAccount.primaryConnectionString,
+    new azure.appservice.FunctionApp(`cbq${name}-fa`, {
+        ...resourceGroupArgs,
 
-    appSettings: {
-        "WEBSITE_RUN_FROM_ZIP": codeBlobQueuePauseUrl,
-        "FUNCTIONS_EXTENSION_VERSION": "~2",
-        "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
-        "ApplicationInsights:InstrumentationKey": appInsightsKey,
-        "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
-        "queuename": queue.name
-    },
+        appServicePlanId: appServicePlan.id,
+        storageConnectionString: storageAccount.primaryConnectionString,
 
-    version: "beta"
-});
+        appSettings: {
+            "WEBSITE_RUN_FROM_ZIP": codeBlobQueueUrl,
+            "FUNCTIONS_EXTENSION_VERSION": version,
+            "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
+            "ApplicationInsights:InstrumentationKey": appInsightsKey,
+            "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
+            "pausequeuename": queuePause.name,
+            "bcryptqueuename": queueBcrypt.name
+        },
 
-function sendToQueue(queueSvc: any, message: any) {
-    return new Promise(function(resolve, reject){
-        const json = JSON.stringify(message);
-        queueSvc.createMessage(queue.name.get(), Buffer.from(json).toString('base64'), 
-            (error: any, results: any, response: any) => {
-                if(error){
-                reject(error);
-                } else {
-                    resolve();
-                }            
-        });
+        version: version === "~2" ? "beta" : "~1"
     });
 }
+
+addQueue("v2cs", "v2/dotnet/bin/Debug/netstandard2.0/publish", "~2");
+addQueue("v1cs", "v1/dotnet/bin/Debug/net461/publish", "~1");
+addQueue("v2js", "v2/js", "~2");
+addQueue("v1js", "v1/js", "~1");
+
+// function sendToQueue(queueSvc: any, message: any) {
+//     return new Promise(function(resolve, reject){
+//         const json = JSON.stringify(message);
+//         queueSvc.createMessage(queue.name.get(), Buffer.from(json).toString('base64'), 
+//             (error: any, results: any, response: any) => {
+//                 if(error){
+//                 reject(error);
+//                 } else {
+//                     resolve();
+//                 }            
+//         });
+//     });
+// }
 
 // cloud.timer.cron("cbqpauseschedule", "0 15 * * * *", async () => {
 //     const storage = require("azure-storage");

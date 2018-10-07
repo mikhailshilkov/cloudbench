@@ -8,5 +8,9 @@
           "isEnabled": true,
           "maxTelemetryItemsPerSecond" : 5
         }
+    },
+    "queues": {
+      "batchSize": 16,
+      "newBatchThreshold": 8
     }
 }

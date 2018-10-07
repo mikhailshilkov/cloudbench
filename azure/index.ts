@@ -99,7 +99,7 @@ const appInsights = new azure.appinsights.Insights(`${name}-ai`, {
     location: "West Europe"
 });
 
-function apps(prefix: string) {
+function apps(prefix: string, deps: boolean) {
     const v1js = new MyFunctionApp(`${prefix}v1js`, {
         resourceGroup,
         storageAccount,
@@ -145,14 +145,64 @@ function apps(prefix: string) {
         version: "beta"
     });
 
-    return {
-        v1js: v1js.url,
-        v1dotnet: v1dotnet.url,
-        v2js: v2js.url,
-        v2dotnet: v2dotnet.url,
-        v2java: v2java.url
-    };
+    if (deps) {
+        const v1jsdeps = new MyFunctionApp(`${prefix}v1jsdeps`, {
+            resourceGroup,
+            storageAccount,
+            storageContainer,
+            appInsights,
+            path: "http/v1/jsdeps",
+            version: "~1"
+        });
+
+        const v1jsdepsmax = new MyFunctionApp(`${prefix}v1jsdepsmax`, {
+            resourceGroup,
+            storageAccount,
+            storageContainer,
+            appInsights,
+            path: "http/v1/jsdepsmax",
+            version: "~1"
+        });
+
+        const v2jsdeps = new MyFunctionApp(`${prefix}v2jsdeps`, {
+            resourceGroup,
+            storageAccount,
+            storageContainer,
+            appInsights,
+            path: "http/v2/jsdeps",
+            version: "beta"
+        });
+    
+        const v2jsdepsmax = new MyFunctionApp(`${prefix}v2jsdepsmax`, {
+            resourceGroup,
+            storageAccount,
+            storageContainer,
+            appInsights,
+            path: "http/v2/jsdepsmax",
+            version: "beta"
+        });    
+
+        return {
+            v1js: v1js.url,
+            v1jsdeps: v1jsdeps.url,
+            v1jsdepsmax: v1jsdepsmax.url,
+            v1dotnet: v1dotnet.url,
+            v2js: v2js.url,
+            v2jsdeps: v2jsdeps.url,
+            v2jsdepsmax: v2jsdepsmax.url,
+            v2dotnet: v2dotnet.url,
+            v2java: v2java.url
+        };
+    } else {
+        return {
+            v1js: v1js.url,
+            v1dotnet: v1dotnet.url,
+            v2js: v2js.url,
+            v2dotnet: v2dotnet.url,
+            v2java: v2java.url
+        };
+    }
 }
 
-exports.coldStarts = apps("");
-exports.fire = apps("fire");
+//exports.coldStarts = apps("", false);
+exports.fire = apps("fire", false);

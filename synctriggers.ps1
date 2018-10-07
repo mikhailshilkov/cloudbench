@@ -12,11 +12,14 @@ Function SyncFunctionAppTriggers($ResourceGroupName, $SiteName)
     Invoke-AzureRmResourceAction -ResourceGroupName $ResourceGroupName -ResourceType "Microsoft.Web/sites" -ResourceName $SiteName -Action syncfunctiontriggers -ApiVersion $WebAppApiVersion -Force
 }
 
-$rgs = "cloudbenchbf740389", "cbscheduler-global-e34bcd64", "cbazure-rg31a0b853"
+#$rgs = "cloudbenchbf740389", "cbscheduler-global-e34bcd64", "cbazure-rg31a0b853"
+#$rgs = "cbastrata-rga8c575cb", "cbastrata-rga8c575cb"
+$rgs = "cloudbenchef415e54", "cbprodrive-rg06b4051e"
 
 
 ForEach ($rg in $rgs)
 { 
+    Write-Host ("RG " + $rg)
     $apps = ListWebApps -ResourceGroupName $rg
     ForEach ($app in $apps) 
     {

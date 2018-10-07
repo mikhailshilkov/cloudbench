@@ -1,0 +1,4 @@
+config:
+  cloud-azure:location: West Europe
+  cloud:provider: azure
+  cbastrat:appInsightsKey: 27bc44aa-6245-4652-bc55-857f637883e5

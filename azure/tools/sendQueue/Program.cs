@@ -14,15 +14,19 @@ namespace sendQueue
         {
             ServicePointManager.UseNagleAlgorithm = false; 
             Console.WriteLine("Hello World!");
-            SendStuff(0, 10000, 50, 0);
+            SendStuff(0, 100000, 50, 0);
             Console.WriteLine("Done!");
         }
 
         private static void SendStuff(int min, int max, int parallel, int delay)
         {
-            var storageAccount = CloudStorageAccount.Parse("DefaultEndpointsProtocol=https;AccountName=cloudbenchsae5279838;AccountKey=pkxoXix9vUPjfqfkPvdTmLfaZdq2oSwKoVYQRMGWkskz8r7uA/Q7WTgmGSpDD6k0oAZnIS9uMlwsSw88ryouWA==;EndpointSuffix=core.windows.net");
+            var storageAccount = CloudStorageAccount.Parse("redacted");
             var queueClient = storageAccount.CreateCloudQueueClient();
-            var queue = queueClient.GetQueueReference("queuepaused72c9320");
+            //var name = "queuebcryptv2cs63c61be1";
+            //var name = "queuebcryptv1cse2744d7c";
+            //var name = "queuepausev1jsae76ccce";
+            var name = "queuepausev2js58ae0f84";
+            var queue = queueClient.GetQueueReference(name);
             for (int i = min; i < max / parallel; i++)
             {
                 var messages = Enumerable.Range(0, parallel).Select(j => new CloudQueueMessage((i* parallel + j).ToString()));

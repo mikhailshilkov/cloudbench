@@ -11,5 +11,11 @@
               "maxTelemetryItemsPerSecond" : 5
             }
         }
+    },
+    "extensions": {
+        "queues": {
+            "batchSize": 2,
+            "newBatchThreshold": 2
+        }
     }
 }

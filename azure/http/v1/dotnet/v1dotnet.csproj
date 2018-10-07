@@ -7,7 +7,7 @@
     <None Remove="local.settings.json" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Bcrypt.Net" Version="0.1.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="3.1.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.22" />
   </ItemGroup>
   <ItemGroup>

@@ -14,16 +14,16 @@ namespace CloudBench
         static Queues()
         {
             var stagesSetting = Environment.GetEnvironmentVariable("BcryptStages", EnvironmentVariableTarget.Process);
-            BcryptStages = !String.IsNullOrEmpty(stagesSetting) ? Convert.ToInt32(stagesSetting) : 9;
+            BcryptStages = !String.IsNullOrEmpty(stagesSetting) ? Convert.ToInt32(stagesSetting) : 10;
         }
 
-        [FunctionName("QueuePause")]
+        [FunctionName("V2QueuePause")]
         public static async Task RunPause([QueueTrigger("%pausequeuename%") ]string message, ILogger log)
         {
-            await Task.Delay(100);
+            await Task.Delay(500);
         }
 
-        [FunctionName("QueueBcrypt")]
+        [FunctionName("V2QueueBcrypt")]
         public static void RunBcrypt([QueueTrigger("%bcryptqueuename%") ]string message, ILogger log)
         {
             BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString(), BcryptStages);

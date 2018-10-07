@@ -1,0 +1,4 @@
+config:
+  cloud-azure:location: West Europe
+  cloud:provider: azure
+  cbprodri:appInsightsKey: 3bb09ed9-7591-479e-a4bd-e1152de82fd7

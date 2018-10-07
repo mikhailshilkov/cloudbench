@@ -17,7 +17,7 @@ namespace CloudBench
     {
         static Monitor()
         {
-            telemetry.InstrumentationKey = "905430be-f8c4-4b4f-a0e4-e085ccf9afee";
+            telemetry.InstrumentationKey = Environment.GetEnvironmentVariable("ApplicationInsights:InstrumentationKey", EnvironmentVariableTarget.Process);
         }
 
         [FunctionName("TimerFire")]

@@ -1,0 +1,6 @@
+{
+    "name": "cloudbench-azure-samplefunc",
+    "dependencies": {
+        "bcryptjs": "^2.4.3"
+    }
+}
