@@ -1,0 +1,15 @@
+{
+    "name": "cloudbench-aws",
+    "dependencies": {
+        "@pulumi/aws": "latest",
+        "@pulumi/pulumi": "latest",
+        "applicationinsights": "^1.0.6"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.26",
+        "typescript": "^3.0.3"
+    },
+    "pulumi": {
+        "runtimeDependencies": {}
+    }
+}

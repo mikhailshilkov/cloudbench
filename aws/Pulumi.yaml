@@ -1,0 +1,3 @@
+name: Cloudbench AWS Lambda
+description: Cloudbench AWS Lambda
+runtime: nodejs
