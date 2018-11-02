@@ -1,0 +1,14 @@
+{
+    "name": "cloudbench-gcp",
+    "dependencies": {
+        "@pulumi/gcp": "latest",
+        "@pulumi/pulumi": "latest"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.26",
+        "typescript": "^3.0.3"
+    },
+    "pulumi": {
+        "runtimeDependencies": {}
+    }
+}

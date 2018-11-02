@@ -2,8 +2,7 @@
     "name": "cloudbench-aws",
     "dependencies": {
         "@pulumi/aws": "latest",
-        "@pulumi/pulumi": "latest",
-        "applicationinsights": "^1.0.6"
+        "@pulumi/pulumi": "latest"
     },
     "devDependencies": {
         "@types/node": "^8.0.26",
