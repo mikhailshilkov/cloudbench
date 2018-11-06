@@ -29,8 +29,9 @@ namespace sendQueue
             Console.WriteLine("Done!");
         }
 
-        private static void Stats()
+        private static void StatsBin(int x)
         {
+            File.AppendAllLines("stats.txt", new[] { $"{x} second bins:" });
             var logs = File.ReadAllLines("logs.txt");
             var entries = 
                 logs
@@ -45,13 +46,20 @@ namespace sendQueue
             var startTime = entries[0].Time;
             var stats = 
                (from e in entries
-                let bin = (int)((e.Time - startTime).TotalSeconds / 60)
+                let bin = (int)((e.Time - startTime).TotalSeconds / x)
                 group e by bin into g
                 let count = g.Count()
                 let instances = g.Select(i => i.Instance).Distinct().Count()
                 select $"{g.Key},{count},{instances}"
                 ).ToList();
-            File.WriteAllLines("stats.txt", stats);
+            File.AppendAllLines("stats.txt", stats);
+            File.AppendAllLines("stats.txt", new[] { $"Written {stats.Count}\n" });
+        }
+
+        private static void Stats()
+        {
+            StatsBin(60);
+            StatsBin(6);            
         }
 
         private static async Task DumpLogs(string project, string subscription, int logStep)

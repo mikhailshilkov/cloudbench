@@ -55,7 +55,7 @@ let bcryptLambda = new aws.lambda.Function("bcrypt-lambda", {
     timeout: 5,
     handler: "index.handler",
     role: role.arn,
-    memorySize: 128
+    memorySize: 512
 }, { dependsOn: [fullAccessLambda, fullAccessSqs] });
 
 const bcryptQueue = new aws.sqs.Queue("cloudbench-aws-bcrypt-queue", {

@@ -51,7 +51,7 @@ const bcryptFunc = new gcp.cloudfunctions.Function("cloudbench-gcp-bcrypt-func",
         eventType: "providers/cloud.pubsub/eventTypes/topic.publish",
         resource: bcryptTopic.name
     },
-    availableMemoryMb: 128
+    availableMemoryMb: 512
 });
 
 export const bcryptTopicUrl = bcryptTopic.urn;

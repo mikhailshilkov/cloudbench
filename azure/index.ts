@@ -9,6 +9,7 @@ export interface MyAppServiceOptions {
     readonly appInsights: azure.appinsights.Insights;
     readonly path: string;
     readonly version: string;
+    readonly appSettings?: object;
 }
 
 class MyFunctionApp extends pulumi.ComponentResource {
@@ -56,7 +57,8 @@ class MyFunctionApp extends pulumi.ComponentResource {
                 "FUNCTIONS_EXTENSION_VERSION": "~2",
                 "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
                 "ApplicationInsights:InstrumentationKey": appInsights.instrumentationKey,
-                "APPINSIGHTS_INSTRUMENTATIONKEY": appInsights.instrumentationKey                        
+                "APPINSIGHTS_INSTRUMENTATIONKEY": appInsights.instrumentationKey,
+                ...options.appSettings
             },
         
             version: options.version
@@ -204,5 +206,36 @@ function apps(prefix: string, deps: boolean) {
     }
 }
 
+function queues(prefix: string) {
+
+    const pauseQueue = new azure.storage.Queue(`${prefix}queuev2js`, {
+        resourceGroupName: resourceGroup.name,
+        storageAccountName: storageAccount.name
+    });
+
+    const bcryptQueue = new azure.storage.Queue(`${prefix}queuebcryptv2js`, {
+        resourceGroupName: resourceGroup.name,
+        storageAccountName: storageAccount.name
+    });
+
+    new MyFunctionApp(`${prefix}v2js`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer,
+        appInsights,
+        path: "queue/v2/js",
+        version: "~2",
+        appSettings: {
+            "pausequeuename": pauseQueue.name,
+            "bcryptqueuename": bcryptQueue.name
+        }
+    });
+    return {
+        pauseQueue: pauseQueue.name,
+        bcryptQueue: bcryptQueue.name
+    };
+}
+
 //exports.coldStarts = apps("", false);
-exports.fire = apps("fire", false);
+//exports.fire = apps("fire", false);
+exports.queues = queues("q");
