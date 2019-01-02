@@ -63,3 +63,4 @@ typings/
 bin/
 obj/
 debug/
+packages/

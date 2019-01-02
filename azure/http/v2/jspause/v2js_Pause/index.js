@@ -2,7 +2,7 @@ module.exports = function(context) {
     setTimeout(() => {
         context.bindings.res = { 
           status: 200, 
-          body: 'AzureFunction_V2_JS_Pause',
+          body: 'Azure_JSPause_' + process.env['WEBSITE_INSTANCE_ID'].substring(0, 8),
           headers: {
               "Content-Type": "text/plain"
           } 

@@ -69,7 +69,17 @@ namespace CloudBench
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     var body = await response.Content.ReadAsStringAsync();
-                    name = $"CloudBench_Fire_{body}";
+                    string signature = null;
+                    if (response.Headers.Contains("X-CB-Signature"))
+                    {
+                        signature = response.Headers.GetValues("X-CB-Signature").First();
+                    }
+                    else
+                    {
+                        signature = body.Length > 40 ? body.Remove(40) : body;
+                    }
+                    
+                    name = $"CloudBench_Fire_{signature}";
                 }
                 else
                 {

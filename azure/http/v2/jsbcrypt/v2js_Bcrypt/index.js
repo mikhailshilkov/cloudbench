@@ -6,7 +6,7 @@ module.exports = function(context) {
 
     context.bindings.res = { 
       status: 200, 
-      body: 'AzureFunction_V2_JS_Bcrypt',
+      body: 'Azure_JSBcrypt_' + process.env['WEBSITE_INSTANCE_ID'].substring(0, 8),
       headers: {
             "Content-Type": "text/plain"
       } 

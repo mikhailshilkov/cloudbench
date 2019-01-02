@@ -1,0 +1,6 @@
+{
+    "name": "cloudbench-gcp-queuebcrypt",
+    "dependencies": {
+        "bcryptjs": "^2.4.3"
+    }
+}

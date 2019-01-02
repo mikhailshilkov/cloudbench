@@ -5,11 +5,12 @@ import * as serverless from "@pulumi/azure-serverless";
 import * as r from "request";
 import { signedBlobReadUrl } from "../azure/util";
 
-const name = pulumi.getStack().substr(0, 8);
+const name = pulumi.getStack().substring(0, 8);
 
-const config = new pulumi.Config(name);
-const appInsightsKey = config.get("appInsightsKey");
-if (!appInsightsKey) console.error("AppInsights key not found!");
+const config = new pulumi.Config("cloudbench-scheduler");//name);
+
+//const appInsightsKey = config.get("appInsightsKey");
+//if (!appInsightsKey) console.error("AppInsights key not found!");
 
 function ping(request: any, httpAgent: any, client: any, metricName: string, url: string) : Promise<void> {        
     console.log("Sending request to " + url);
@@ -22,12 +23,12 @@ function ping(request: any, httpAgent: any, client: any, metricName: string, url
                 client.trackException({ exception: error });
                 return resolve(); // still resolve not to fail the container function
             }
-
+            const signature = response.headers['X-CB-Signature'] || (body.length > 30 ? body.substring(0, 30) : body);
             const hrtime = process.hrtime(start);
             const duration = 1000*hrtime[0] + Math.round(hrtime[1] / 1000000);
 
             try {
-                client.trackMetric({name: `CloudBench_${metricName}_${body}`, value: duration}); 
+                client.trackMetric({name: `CloudBench_${metricName}_${signature}`, value: duration}); 
                 client.flush({callback: () =>{
                     console.log(`Tracked ${body} in ${duration}ms`);
                     resolve();
@@ -73,16 +74,16 @@ function ping(request: any, httpAgent: any, client: any, metricName: string, url
 // }
 
 const resourceGroup = new azure.core.ResourceGroup("cloudbench", {
-    location: "West Europe",
+    location: "North Europe",
 });
 
-// Create a storage account for our images
-const storageAccount = new azure.storage.Account("cloudbenchsa", {
+const appInsights = new azure.appinsights.Insights(`cloudbench-ai`, {
     resourceGroupName: resourceGroup.name,
-    location: resourceGroup.location,
-    accountReplicationType: "LRS",
-    accountTier: "Standard",
+    applicationType: 'Web',
+    location: "North Europe"
 });
+
+const appInsightsKey = appInsights.instrumentationKey;
 
 // const queue = new azure.storage.Queue("fire", {
 //     storageAccountName: storageAccount.name,
@@ -168,9 +169,22 @@ const storageAccount = new azure.storage.Account("cloudbenchsa", {
 
 //----------- MONITOR C#
 
+const resourceGroupMonitor = new azure.core.ResourceGroup("cbmonitorrg", {
+    location: "North Europe",
+});
+
+// Create a storage account for our images
+const storageAccount = new azure.storage.Account("cbmonitorsa", {
+    resourceGroupName: resourceGroupMonitor.name,
+    location: resourceGroupMonitor.location,
+    accountReplicationType: "LRS",
+    accountTier: "Standard",
+});
+
+
 const resourceGroupArgs = {
-    resourceGroupName: resourceGroup.name,
-    location: resourceGroup.location,
+    resourceGroupName: resourceGroupMonitor.name,
+    location: resourceGroupMonitor.location,
 };
 
 const appServicePlan = new azure.appservice.Plan("cbcsmonitor", {
@@ -186,13 +200,13 @@ const appServicePlan = new azure.appservice.Plan("cbcsmonitor", {
 });
 
 const storageContainer = new azure.storage.Container("cbcsmonitor-c", {
-    resourceGroupName: resourceGroup.name,
+    resourceGroupName: resourceGroupMonitor.name,
     storageAccountName: storageAccount.name,
     containerAccessType: "private",
 });
         
 const blob = new azure.storage.ZipBlob(`${name}-b`, {
-    resourceGroupName: resourceGroup.name,
+    resourceGroupName: resourceGroupMonitor.name,
     storageAccountName: storageAccount.name,
     storageContainerName: storageContainer.name,
     type: "block",
@@ -222,15 +236,28 @@ const codeBlobUrl = signedBlobReadUrl(blob, storageAccount, storageContainer);
 //     "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_pause",
 //     "https://firev2js-fa0d76b5b4.azurewebsites.net/api/v2js_bcrypt"];
 
+// const azureUrls = [
+//     "https://firev1dotnet-fa99d17b8c.azurewebsites.net/api/v1dotnetbcrypt",
+//     "https://firev2dotnet-fab6c65e50.azurewebsites.net/api/v2dotnetbcrypt",
+//     "https://firev1js-fa917b8d2b.azurewebsites.net/api/v1js_bcrypt",
+//     "https://firev2js-fad0af265e.azurewebsites.net/api/v2js_bcrypt"
+// ];
+
 const urls = [
-    "https://firev1dotnet-fa99d17b8c.azurewebsites.net/api/v1dotnetbcrypt",
-    "https://firev2dotnet-fab6c65e50.azurewebsites.net/api/v2dotnetbcrypt",
-    "https://firev1js-fa917b8d2b.azurewebsites.net/api/v1js_bcrypt",
-    "https://firev2js-fad0af265e.azurewebsites.net/api/v2js_bcrypt"
+    // "https://4j8c68lsx6.execute-api.eu-central-1.amazonaws.com/stage/pause",
+    // "https://4j8c68lsx6.execute-api.eu-central-1.amazonaws.com/stage/bcrypt",
+    //"https://4j8c68lsx6.execute-api.eu-central-1.amazonaws.com/stage/blob",
+    // "https://us-central1-cloudbench-221016.cloudfunctions.net/cloudbench-gcp-pause-func-fab8dec",
+    // "https://us-central1-cloudbench-221016.cloudfunctions.net/cloudbench-gcp-bcrypt-func-28577e8",
+    //"https://cbazure-jspause-fa98563d9f.azurewebsites.net/api/v2js_Pause",
+    //"https://cbazure-jsbcrypt-fa2f48fa29.azurewebsites.net/api/v2js_Bcrypt",
+    "https://cbazure-jsblob-fafb96dd97.azurewebsites.net/api/Html",
+    //"https://cbazure-jsblobnet-fa54b0482b.azurewebsites.net/api/v2dotnetbblob",
+    //"https://us-central1-cloudbench-221016.cloudfunctions.net/cloudbench-gcp-blob-func-f315077"
 ];
 
-function addMonitor(minute: number) { 
-    new azure.appservice.FunctionApp(`cbcsmonitor-fa${minute !== 0 ? minute.toString() : ""}`, {
+function addMonitor(minute: number, name?: string) { 
+    new azure.appservice.FunctionApp(`cbcsmonitor-fa${name || minute.toString()}`, {
         ...resourceGroupArgs,
 
         appServicePlanId: appServicePlan.id,
@@ -242,70 +269,68 @@ function addMonitor(minute: number) {
             "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
             "ApplicationInsights:InstrumentationKey": appInsightsKey,
             "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
-            "Schedule": `0 ${minute} 0-3 * * *`,
-            "LinearK": "10",
-            "QuadraticK": "0.5",
+            "Schedule": `0 5${minute%10} 9 31 * *`,
+            "LinearK": "25",
+            "QuadraticK": "0",
             "TargetUrl": urls.join(",")
         },
 
-        version: "beta"
+        version: "~2"
     });
 }
 
-// addMonitor(0);
-// addMonitor(2);
-// addMonitor(4);
-// addMonitor(6);
-// addMonitor(8);
+for (let i = 0; i < 40; i++) {
+    addMonitor(i);    
+}
 
 //----------- QUEUE PAUSE PROCESSOR C#
 
-function addQueue(name: string, path: string, version: string) {
-    const queuePause = new azure.storage.Queue(`queuepause${name}`, {
-        storageAccountName: storageAccount.name,
-        resourceGroupName: resourceGroup.name
-    });
+// function addQueue(name: string, path: string, version: string) {
+//     const queuePause = new azure.storage.Queue(`queuepause${name}`, {
+//         storageAccountName: storageAccount.name,
+//         resourceGroupName: resourceGroup.name
+//     });
 
-    const queueBcrypt = new azure.storage.Queue(`queuebcrypt${name}`, {
-        storageAccountName: storageAccount.name,
-        resourceGroupName: resourceGroup.name
-    });
+//     const queueBcrypt = new azure.storage.Queue(`queuebcrypt${name}`, {
+//         storageAccountName: storageAccount.name,
+//         resourceGroupName: resourceGroup.name
+//     });
 
-    const blobQueuePause = new azure.storage.ZipBlob(`cbcsq${name}-b`, {
-        resourceGroupName: resourceGroup.name,
-        storageAccountName: storageAccount.name,
-        storageContainerName: storageContainer.name,
-        type: "block",
+//     const blobQueuePause = new azure.storage.ZipBlob(`cbcsq${name}-b`, {
+//         resourceGroupName: resourceGroup.name,
+//         storageAccountName: storageAccount.name,
+//         storageContainerName: storageContainer.name,
+//         type: "block",
 
-        content: new pulumi.asset.FileArchive("../azure/queue/" + path)
-    });
+//         content: new pulumi.asset.FileArchive("../azure/queue/" + path)
+//     });
 
-    const codeBlobQueueUrl = signedBlobReadUrl(blobQueuePause, storageAccount, storageContainer);
+//     const codeBlobQueueUrl = signedBlobReadUrl(blobQueuePause, storageAccount, storageContainer);
 
-    new azure.appservice.FunctionApp(`cbq${name}-fa`, {
-        ...resourceGroupArgs,
+//     new azure.appservice.FunctionApp(`cbq${name}-fa`, {
+//         ...resourceGroupArgs,
 
-        appServicePlanId: appServicePlan.id,
-        storageConnectionString: storageAccount.primaryConnectionString,
+//         appServicePlanId: appServicePlan.id,
+//         storageConnectionString: storageAccount.primaryConnectionString,
 
-        appSettings: {
-            "WEBSITE_RUN_FROM_ZIP": codeBlobQueueUrl,
-            "FUNCTIONS_EXTENSION_VERSION": version,
-            "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
-            "ApplicationInsights:InstrumentationKey": appInsightsKey,
-            "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
-            "pausequeuename": queuePause.name,
-            "bcryptqueuename": queueBcrypt.name
-        },
+//         appSettings: {
+//             "WEBSITE_RUN_FROM_ZIP": codeBlobQueueUrl,
+//             "FUNCTIONS_EXTENSION_VERSION": version,
+//             "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
+//             "ApplicationInsights:InstrumentationKey": appInsightsKey,
+//             "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
+//             "pausequeuename": queuePause.name,
+//             "bcryptqueuename": queueBcrypt.name
+//         },
 
-        version: version === "~2" ? "beta" : "~1"
-    });
-}
+//         version: version === "~2" ? "beta" : "~1"
+//     });
+// }
 
-addQueue("v2cs", "v2/dotnet/bin/Debug/netstandard2.0/publish", "~2");
-addQueue("v1cs", "v1/dotnet/bin/Debug/net461/publish", "~1");
-addQueue("v2js", "v2/js", "~2");
-addQueue("v1js", "v1/js", "~1");
+// addQueue("v2cs", "v2/dotnet/bin/Debug/netstandard2.0/publish", "~2");
+// addQueue("v1cs", "v1/dotnet/bin/Debug/net461/publish", "~1");
+// addQueue("v2js", "v2/js", "~2");
+// addQueue("v1js", "v1/js", "~1");
 
 // function sendToQueue(queueSvc: any, message: any) {
 //     return new Promise(function(resolve, reject){
