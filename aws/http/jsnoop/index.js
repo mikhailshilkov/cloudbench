@@ -1,0 +1,24 @@
+const fs = require("fs");
+var buf = fs.readFileSync("/proc/self/cgroup", "utf8").toString();
+buf = buf.split("\n");
+buf = buf[buf.length - 3];
+buf = buf.split("/");
+
+const instance = `AWS:${buf[1].substring(13)}`;
+const memory = process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE;
+let count = 0;
+
+exports.handler = async (event) => {
+    count += 1;
+    
+    return {
+        statusCode: 200,
+        body: `AWS_JSNoop_${memory}_${instance}`,
+        headers: {
+            "Content-Type": "text/plain",
+            "X-CB-Name": `AWS_JSNoop_${memory}`,
+            "X-CB-Count": count,
+            "X-CB-Instance": instance
+        },
+    };
+};

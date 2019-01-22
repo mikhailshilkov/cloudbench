@@ -6,10 +6,11 @@ const state = {
   instanceID: Math.random().toString(36).substring(3)
 };
 
+const bucket = storage.bucket("tmp-stackoverflow-blobs");
+
 function downloadString (key) {
   return new Promise((resolve, reject) => {
-    storage
-      .bucket("tmp-stackoverflow-blobs")
+    bucket
       .file(key)
       .download(function(err, contents) {
         if (err) {
@@ -25,18 +26,23 @@ let qparts;
 let aparts;
 let ids;
 
-function work(response) {
+function work(durations, response) {
   let id = ids[Math.floor(Math.random() * ids.length)];
 
+  const start = process.hrtime();
   downloadString(id + '.json').then(data => {
-    const json = JSON.parse(data);
+    const hrtime = process.hrtime(start);
+    const duration = 1000*hrtime[0] + Math.round(hrtime[1] / 1000000);
+    durations.push(duration);
 
-    const answers = json.answers.map(a => aparts[0] + a + aparts[1]).join('');
-    const html = qparts[0] + json.title + qparts[1] + json.text + qparts[2] + answers + qparts[3];
-
-    response.set('Content-Type', 'text/html')
-    response.set('X-CB-Signature', 'GCP_JSBlob_' + state.instanceID);
-    response.status(200).send(html);
+    if (durations.length > 100) {
+      durations.sort((a, b) => a - b);
+      const stats = `Min: ${durations[0]}, Median: ${durations[50]}, P90: ${durations[90]}, P95: ${durations[95]}, Max: ${durations[durations.length - 1]}`;
+      response.set('Content-Type', 'text/html')
+      response.set('X-CB-Signature', 'GCP_JSBlob_' + state.instanceID);
+      response.status(200).send(stats);
+    }
+    else work(durations, response);
   });
 }
 
@@ -53,12 +59,12 @@ exports.handler = (request, response) => {
 
         downloadString('ids.json').then(idsString => {
           ids = idsString.split(',');
-          work(response);
+          work([], response);
         });
       });
     })
   }
   else {
-    work(response);
+    work([], response);
   }
 };

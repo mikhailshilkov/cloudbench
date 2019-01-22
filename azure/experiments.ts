@@ -138,3 +138,58 @@
 // //exports.coldStarts = apps("", false);
 // //exports.fire = apps("fire", false);
 // exports.queues = queues("q");
+
+
+// const storageContainer = new azure.storage.Container(`${name}-c`, {
+//     resourceGroupName: resourceGroup.name,
+//     storageAccountName: storageAccount.name,
+//     containerAccessType: "private",
+// });
+
+// const appInsights = new azure.appinsights.Insights(`${name}-ai`, {
+//     resourceGroupName: resourceGroup.name,
+//     applicationType: 'Web',
+//     location: "West Europe"
+// });
+
+// const jspause = new FunctionApp(`${name}-jspause`, {
+//     resourceGroup,
+//     storageAccount,
+//     storageContainer,
+//     appInsights,
+//     path: "http/v2/jspause",
+//     version: "~2"
+// });
+
+// const jsbcrypt = new FunctionApp(`${name}-jsbcrypt`, {
+//     resourceGroup,
+//     storageAccount,
+//     storageContainer,
+//     appInsights,
+//     path: "http/v2/jsbcrypt",
+//     version: "~2"
+// });
+
+// const jsblob = new FunctionApp(`${name}-jsblob`, {
+//     resourceGroup,
+//     storageAccount,
+//     storageContainer,
+//     appInsights,
+//     path: "http/v2/jsblob",
+//     version: "~2"
+// });
+
+// const jsblobnet = new FunctionApp(`${name}-jsblobnet`, {
+//     resourceGroup,
+//     storageAccount,
+//     storageContainer,
+//     appInsights,
+//     path: "http/v2/dotnet/bin/debug/netcoreapp2.1/publish",
+//     version: "~2"
+// });
+
+// export const storage = storageAccount.primaryConnectionString;
+// export const jspauseUrl = jspause.url;
+// export const jsbcryptUrl = jsbcrypt.url;
+// export const jsblobUrl = jsblob.url;
+// export const jsblobnetUrl = jsblobnet.url;

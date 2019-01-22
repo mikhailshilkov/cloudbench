@@ -1,0 +1,6 @@
+{
+  "Encrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet"
+  }
+}

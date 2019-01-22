@@ -66,7 +66,7 @@ export class FunctionApp extends pulumi.ComponentResource {
         });
 
         this.url = v1js.defaultHostname.apply(h => {
-            return `https://${h}/api/${name}`;
+            return `https://${h}/api/`;
         });
     }
 }

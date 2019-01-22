@@ -56,19 +56,80 @@ let bcryptLambda = new aws.lambda.Function("bcrypt-lambda", {
 let blobLambda = new aws.lambda.Function("blob-lambda", {
     runtime: aws.lambda.NodeJS8d10Runtime,
     code: new asset.AssetArchive({
-        ".": new asset.FileArchive("./http/jsblob"),
+        ".": new asset.FileArchive("./http/jsblobmeasure"),
     }),
-    timeout: 5,
+    timeout: 50,
     handler: "index.handler",
     role: role.arn,
     memorySize: 512
 }, { dependsOn: [fullAccessLambda, fullAccessS3] });
 
+// No-op JS lambda for cold starts
+let jsCold128Lambda = new aws.lambda.Function("jscold-lambda", {
+    runtime: aws.lambda.NodeJS8d10Runtime,
+    code: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/jsnoop"),
+    }),
+    timeout: 5,
+    handler: "index.handler",
+    role: role.arn,
+    memorySize: 128
+}, { dependsOn: [fullAccessLambda] });
+let jsCold128Lambda2 = new aws.lambda.Function("jscold-lambda2", {
+    runtime: aws.lambda.NodeJS8d10Runtime,
+    code: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/jsnoop"),
+    }),
+    timeout: 5,
+    handler: "index.handler",
+    role: role.arn,
+    memorySize: 128
+}, { dependsOn: [fullAccessLambda] });
+let jsCold1024Lambda = new aws.lambda.Function("jscold-lambda-1024", {
+    runtime: aws.lambda.NodeJS8d10Runtime,
+    code: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/jsnoop"),
+    }),
+    timeout: 5,
+    handler: "index.handler",
+    role: role.arn,
+    memorySize: 1024
+}, { dependsOn: [fullAccessLambda] });
+
+// No-op Python lambda for cold starts
+let pythonCold128Lambda = new aws.lambda.Function("pythoncold-lambda", {
+    runtime: aws.lambda.Python3d6Runtime,
+    code: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/pythonnoop"),
+    }),
+    timeout: 5,
+    handler: "handler.handler",
+    role: role.arn,
+    memorySize: 128
+}, { dependsOn: [fullAccessLambda] });
+
+// No-op C# lambda for cold starts
+let csCold128Lambda = new aws.lambda.Function("cscold-lambda", {
+    runtime: aws.lambda.DotnetCore2d0Runtime,
+    code: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/csnoop/bin/Debug/netcoreapp2.0/publish"),
+    }),
+    timeout: 5,
+    handler: "app::app.Functions::GetAsync",
+    role: role.arn,
+    memorySize: 128
+}, { dependsOn: [fullAccessLambda] });
+
 const api = new serverless.apigateway.API(`http-loadtest`, {
     routes: [
         { method: "GET", path: `/pause`, handler: pauseLambda },
         { method: "GET", path: `/bcrypt`, handler: bcryptLambda },
-        { method: "GET", path: `/blob`, handler: blobLambda }
+        { method: "GET", path: `/blob`, handler: blobLambda },
+        { method: "GET", path: `/jscold128`, handler: jsCold128Lambda },
+        { method: "GET", path: `/jscold1024`, handler: jsCold1024Lambda },        
+        { method: "GET", path: `/jscold1282`, handler: jsCold128Lambda2 },
+        { method: "GET", path: `/pythoncold128`, handler: pythonCold128Lambda },        
+        { method: "GET", path: `/cscold128`, handler: csCold128Lambda },        
     ]
 });
 
