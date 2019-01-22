@@ -1,0 +1,28 @@
+{{ $id := .Get 0 }}
+{{ $data := index .Site.Data (.Get 0) }}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+google.charts.load("current", {packages:["corechart"]});
+google.charts.setOnLoadCallback(drawChart);
+function drawChart() {
+  var data = google.visualization.arrayToDataTable({{ $data.points }});
+
+  var options = {
+    height: 500,  
+    chartArea: { width: '80%', height: '60%' },
+    legend: 'none',
+    hAxis: {
+      title: 'Cold Start duration (seconds)',
+      //ticks: [0, 10, 20]
+    },
+    vAxis: {
+      ticks: []
+    }  
+  };
+
+  var chart = new google.visualization.Histogram(document.getElementById('chart_div_{{ $id }}'));
+  chart.draw(data, options);
+}
+</script>
+<div id="chart_div_{{ $id }}"></div>
