@@ -1,5 +1,5 @@
 const STORAGE_ACCOUNT_NAME = "cbazuresa181163d0";
-const ACCESS_KEY = "jzVugXzm5wKa4HST1SL3aayehdJqBdeWSyhkc4srfazKdwEAGF4h2x6JE/OMW5FPeOgwVYlH7fsu9v8WgA3/+Q==";
+const ACCESS_KEY = "TODO";
 const containerName = "samples";
 
 // const {
