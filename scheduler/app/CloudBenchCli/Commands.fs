@@ -5,9 +5,9 @@ open Newtonsoft.Json
 open CloudBench.Model
 
 type ICommands =
-   abstract member Trigger: name: string list -> Async<unit>
+   abstract member Trigger: name: string list -> interval: int -> Async<unit>
    abstract member ColdStartInterval: name: string -> Async<unit>
-   abstract member ColdStartDuration: name: string -> Async<unit>
+   abstract member ColdStartDuration: name: string -> languages: string list -> Async<unit>
 
 type IWorkflowStarter =
    abstract member RunColdStart: functionUrl: string -> interval: int -> Async<unit>
@@ -49,25 +49,38 @@ module Commands =
             do storage.Save (sprintf "ColdStart_%s_Scatter.json" name) chart
         }
 
-        let coldStartDuration name = async {
-            let! blobs = storage.List (sprintf "ColdStart_%s_" name)
+        let coldStartDuration name languages = async {
 
-            let! responses = Async.Parallel (blobs |> List.map loadLogs)
-            let responses = List.concat responses
+            let! durationsByLang =
+                languages
+                |> List.map (fun l -> async {
+                    let! blobs = storage.List (sprintf "ColdStart_%s_%s" name l)
 
-            let durations = coldStartDurations responses
+                    let! responses = Async.Parallel (blobs |> List.map loadLogs)
+                    let responses = List.concat responses
 
-            do storage.Save (sprintf "ColdStart_%s.json" name) durations
+                    let durations = coldStartDurations responses
+                    storage.Save (sprintf "ColdStart_%s_%s.json" name l) durations
+                    return l, responses
+                })
+                |> Async.Parallel
+
+            let summary =
+                durationsByLang
+                |> Map.ofArray
+                |> coldStartComparison
+
+            storage.Save (sprintf "ColdStart_%s_bylanguage.json" name) summary
         }
 
-        let trigger (urls: string list) = async {
+        let trigger (urls: string list) interval = async {
             for url in urls do
-                do! starter.RunColdStart url 120
+                do! starter.RunColdStart url interval
         }
 
         { new ICommands with 
             member __.ColdStartInterval name = coldStartInterval name
-            member __.ColdStartDuration name = coldStartDuration name
-            member __.Trigger urls = trigger urls
+            member __.ColdStartDuration name languages = coldStartDuration name languages
+            member __.Trigger urls interval = trigger urls interval
         }
 

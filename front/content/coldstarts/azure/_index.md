@@ -5,3 +5,5 @@ comments: false
 ### Cold Starts in Azure
 
 TODO Cold Starts in Azure
+
+{{< chart_interval "coldstart_azure_bylanguage" >}}

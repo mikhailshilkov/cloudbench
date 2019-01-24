@@ -6,6 +6,7 @@ buf = buf.split("/");
 
 const instance = `AWS:${buf[1].substring(13)}`;
 const memory = process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE;
+const role = process.env.CLOUDBENCH_ROLE;
 let count = 0;
 
 exports.handler = async (event) => {
@@ -13,10 +14,11 @@ exports.handler = async (event) => {
     
     return {
         statusCode: 200,
-        body: `AWS_JSNoop_${memory}_${instance}`,
+        body: `AWS_JSNoop_${role}${memory}_${instance}`,
         headers: {
             "Content-Type": "text/plain",
-            "X-CB-Name": `AWS_JSNoop_${memory}`,
+            "X-CB-Name": `AWS_JSNoop_${role}${memory}`,
+            "X-CB-Memory": memory,
             "X-CB-Count": count,
             "X-CB-Instance": instance
         },

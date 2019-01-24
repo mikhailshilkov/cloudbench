@@ -21,29 +21,33 @@ let impl parts = async {
 
     let storage = Storage.make storageConnectionString "cloudbench" outputFolder
     let starter = Commands.workflowStarter (urlsSection.["Scheduler"])
+    let urls name =
+        (urlsSection.GetSection name).GetChildren ()
+        |> Seq.map (fun x -> x.Value) 
+        |> List.ofSeq
+
     let commands = Commands.make storage starter
 
     for part in parts do
         match part with
 
         | ScheduleColdStarts ->
-            let gcp = (urlsSection.GetSection "GCP").GetChildren ()
-            let urls = gcp |> Seq.map (fun x -> x.Value) |> List.ofSeq
-            do! commands.Trigger urls
+            do! commands.Trigger (urls "Azure") 40
+            //do! commands.Trigger (urls "AWS") 120
+            //do! commands.Trigger (urls "GCP") 120
         
         | ColdStartIntervals ->
             do! commands.ColdStartInterval "Azure"
-            do! commands.ColdStartInterval "AWS"
-            do! commands.ColdStartInterval "GCP"
+            //do! commands.ColdStartInterval "AWS"
+            //do! commands.ColdStartInterval "GCP"
         
         | ColdStartDurations ->
-            //do! commands.ColdStartDuration "Azure_CS"
-            //do! commands.ColdStartDuration "Azure_JS"
+            do! commands.ColdStartDuration "Azure" ["CS"; "JS"]
             //do! commands.ColdStartDuration "AWS_CS"
-            do! commands.ColdStartDuration "AWS_JS"
+            //do! commands.ColdStartDuration "AWS_JS"
 }
 
 [<EntryPoint>]
 let main _ =
-    Async.RunSynchronously (impl [ScheduleColdStarts])
+    Async.RunSynchronously (impl [ColdStartDurations])
     0

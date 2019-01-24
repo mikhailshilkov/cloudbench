@@ -6,7 +6,10 @@
 google.charts.load("current", {packages:["corechart"]});
 google.charts.setOnLoadCallback(drawChart);
 function drawChart() {
-  var data = google.visualization.arrayToDataTable({{ $data.points }});
+  var data = new google.visualization.DataTable();
+  data.addColumn('number', 'Time');
+  data.addColumn('number', 'Probability');
+  data.addRows({{ $data.points }});
 
   var options = {
     height: 500,  
