@@ -35,30 +35,36 @@ type ChartRoot = {
     points: obj list list
 }
 
-let palette = function
-    | "CS" -> "green"
-    | "JS" -> "blue"
-    | _ -> "gray"
+type LegendItem = {
+    Label: string
+    Order: int
+    Color: string option
+}
 
 let serializePoints xs = 
     { points = xs }
     |> JsonConvert.SerializeObject
 
+let percentile (xs: float list) (p: float) = 
+    Statistics.Quantile(xs |> Seq.ofList, p / 100.)
+
 let probabilityChart (items: ResponseAfterInterval list) =
-    [0..40]
-    |> List.map (fun m -> 
-                    let timespan = TimeSpan.FromMinutes (float m)
+    [0..600]
+    |> List.map (fun x -> float x / 5.)
+    |> List.choose (fun m -> 
+                    let timespan = TimeSpan.FromMinutes m
                     let colds = 
                         items 
-                        |> List.filter (fun x -> x.Interval < timespan)
+                        |> List.filter (fun x -> x.Interval <= timespan)
                         |> List.filter (fun x -> match x.State with | Cold -> true | Warm -> false) 
                         |> List.length
                     let warms = 
                         items 
-                        |> List.filter (fun x -> x.Interval > timespan)
+                        |> List.filter (fun x -> x.Interval >= timespan)
                         |> List.filter (fun x -> match x.State with | Cold -> false | Warm -> true) 
                         |> List.length
-                    m, (float colds / float (colds + warms))
+                    if colds = 0 && warms = 0 then None
+                    else Some (m, (float colds / float (colds + warms)))
                 )
     |> List.map (fun (t, v) -> [t :> obj; v :> obj])
     |> serializePoints
@@ -87,26 +93,29 @@ let coldStartDurations (responses: PingResponse list) =
     |> List.map (fun v -> [v :> obj])
     |> serializePoints
 
-let coldStartComparison (responseMap: Map<string, PingResponse list>) = 
-    let calculateStats (language, responses: PingResponse list) = 
+let coldStartComparison (responseMap: Map<LegendItem, PingResponse list>) = 
+    let calculateStats (item: LegendItem, responses: PingResponse list) = 
         let durations = 
             responses
             |> List.filter (fun x -> x.IsCold)
             |> List.map (fun x -> x.Latency.TotalSeconds)            
-            |> Seq.ofList
-        let statistics = durations |> DescriptiveStatistics
-        let color = palette language
+        let percentiles = percentile durations
+        let color = 
+            item.Color 
+            |> Option.map (fun color -> sprintf "{color: %s; fill-color: %s}" color color)
+            |> Option.defaultValue ""
         [
-            language :> obj
-            statistics.Mean :> obj
-            statistics.Minimum :> obj
-            statistics.Maximum :> obj
-            Statistics.Percentile(durations, 16) :> obj
-            Statistics.Percentile(durations, 84) :> obj
-            sprintf "{color: %s; fill-color: %s}" color color :> obj
+            item.Label :> obj
+            percentiles 50. :> obj
+            percentiles 2.5 :> obj
+            percentiles 97.5 :> obj
+            percentiles 16. :> obj
+            percentiles 84. :> obj
+            color :> obj
         ]
     
     responseMap
     |> Map.toList
+    |> List.sortBy (fun (x, _) -> x.Order)
     |> List.map calculateStats
     |> serializePoints

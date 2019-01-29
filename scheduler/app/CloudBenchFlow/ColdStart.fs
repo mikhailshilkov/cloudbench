@@ -11,11 +11,16 @@ open System.Net
 
 let http = new HttpClient ()
 
+type ScenarioOptions = {
+    MaxDelay: TimeSpan
+    Count: int
+}
+
 let scenario =
-    fun maxDelay ->
+    fun (options: ScenarioOptions) ->
         let r = Random ()
-        let seconds = maxDelay * 60
-        [1 .. 100]
+        let seconds = int options.MaxDelay.TotalSeconds
+        [1 .. options.Count]
         |> List.map (fun _ -> r.Next seconds)
         |> List.map (fun seconds -> TimeSpan.FromSeconds (float seconds))
     |> Activity.define "Scenario"
@@ -66,7 +71,7 @@ let coldStartFlow (param: string) = orchestrator {
         | [|a; b; c|] -> a, Int32.Parse b, Int32.Parse c
         | _ -> failwith "Uknown argument of the workflow"
 
-    let! delays = Activity.call scenario maxDelay
+    let! delays = Activity.call scenario { MaxDelay = TimeSpan.FromMinutes (float maxDelay); Count = count }
 
     let pingAndPause timespan = orchestrator {
         let! response = Activity.call ping url
@@ -83,33 +88,8 @@ let coldStartFlow (param: string) = orchestrator {
     return filename
 }
 
-let testFlow (param: string) = orchestrator {
-    let (url, maxDelay, count) =
-        match param.Split(';') with
-        | [|a|] -> a, 120, 100
-        | [|a; b|] -> a, Int32.Parse b, 100
-        | [|a; b; c|] -> a, Int32.Parse b, Int32.Parse c
-        | _ -> failwith "Uknown argument of the workflow"
-
-    let! delays = Activity.call scenario maxDelay
-
-    let pingAndPause timespan = orchestrator {
-        let! response = Activity.call ping url
-        do! Orchestrator.delay timespan
-        return response
-    }
-
-    let! responses =
-        delays
-        |> List.map pingAndPause
-        |> Activity.seq
-
-    let timings = responses |> List.map (fun x -> int x.Latency.TotalMilliseconds)
-    return timings
-}
-
 [<FunctionName("Scenario")>]
-let Scenario([<ActivityTrigger>] x : int) = Activity.run scenario x
+let Scenario([<ActivityTrigger>] x : ScenarioOptions) = Activity.run scenario x
   
 [<FunctionName("Ping")>]
 let Ping([<ActivityTrigger>] url) = Activity.run ping url
@@ -120,7 +100,3 @@ let SaveLogs([<ActivityTrigger>] responses) = Activity.run saveLogs responses
 [<FunctionName("ColdStartFlow")>]
 let Run ([<OrchestrationTrigger>] context: DurableOrchestrationContext) =
     Orchestrator.run (coldStartFlow, context)
-
-[<FunctionName("TestFlow2")>]
-let Run2 ([<OrchestrationTrigger>] context: DurableOrchestrationContext) =
-    Orchestrator.run (testFlow, context)

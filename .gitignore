@@ -68,3 +68,6 @@ starters.txt
 .vs/
 .vscode/
 appsettings.json
+
+*.zip
+target/

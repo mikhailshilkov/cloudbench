@@ -1,26 +1,19 @@
 {{ $id := .Get 0 }}
 {{ $data := index .Site.Data (.Get 0) }}
+{{ $caption := .Get 1 }}
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-google.charts.load("current", {packages:["corechart"]});
-google.charts.setOnLoadCallback(drawChart);
-function drawChart() {
-  var data = new google.visualization.DataTable();
+addChart(data => {
   data.addColumn('number', 'ID');
   data.addColumn('number', 'Value');
   data.addColumn({ 'type': 'string', 'role': 'style' });
   data.addColumn({ 'type': 'string', 'role': 'tooltip' });
   data.addRows({{ $data.points }});
 
-  var options = {
-    height: 500,  
-    chartArea: { width: '80%', height: '60%' },
-    legend: 'none'
-  };
-
-  var chart = new google.visualization.ScatterChart(document.getElementById('chart_div_{{ $id }}'));
-  chart.draw(data, options);
-}
+  return new google.visualization.ScatterChart(document.getElementById('chart_div_{{ $id }}'));
+});
 </script>
-<div id="chart_div_{{ $id }}"></div>
+<figure>
+  <div id="chart_div_{{ $id }}"></div>
+  <figcaption class="imageCaption"><h4>{{ $caption }}</h4></figcaption>
+</figure>

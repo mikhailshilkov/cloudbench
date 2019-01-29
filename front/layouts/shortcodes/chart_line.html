@@ -1,32 +1,27 @@
 {{ $id := .Get 0 }}
 {{ $data := index .Site.Data (.Get 0) }}
+{{ $caption := .Get 1 }}
 
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-google.charts.load("current", {packages:["corechart"]});
-google.charts.setOnLoadCallback(drawChart);
-function drawChart() {
-  var data = new google.visualization.DataTable();
+addChart((data, options) => {
   data.addColumn('number', 'Time');
   data.addColumn('number', 'Probability');
   data.addRows({{ $data.points }});
 
-  var options = {
-    height: 500,  
-    chartArea: { width: '80%', height: '60%' },
-    legend: 'none',
-    hAxis: {
-      title: 'Time since previous invocation (minutes)',
-      ticks: [0, 10, 20]
-    },
-    vAxis: {
-      title: 'Probability of a Cold Start',
-      ticks: [0, 1.0]
-    }  
+  options.lineWidth = 3;
+  options.hAxis = {
+    title: 'Time since previous invocation (minutes)',
+    ticks: [0, 10, 20]
+  };
+  options.vAxis = {
+    title: 'Probability of a Cold Start',
+    ticks: [0, 1.0]
   };
 
-  var chart = new google.visualization.LineChart(document.getElementById('chart_div_{{ $id }}'));
-  chart.draw(data, options);
-}
+  return new google.visualization.LineChart(document.getElementById('chart_div_{{ $id }}'));
+});
 </script>
-<div id="chart_div_{{ $id }}"></div>
+<figure>
+  <div id="chart_div_{{ $id }}"></div>
+  <figcaption class="imageCaption"><h4>{{ $caption }}</h4></figcaption>
+</figure>

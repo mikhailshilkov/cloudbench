@@ -1,0 +1,13 @@
+{
+  "name": "cloudbench-gcp-jsxldeps",
+  "dependencies": {
+    "aws-sdk": "^2.395.0",
+    "fb": "^2.0.0",
+    "googleapis": "^36.0.0",
+    "lodash": "^4.17.11",
+    "mongodb": "^3.1.13",
+    "neo4j": "^2.0.0-RC2",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2"
+  }
+}

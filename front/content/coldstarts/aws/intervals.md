@@ -12,11 +12,15 @@ The following chart answers this question. It plots the probability of a cold st
 
 {{< chart_line "coldstart_aws_interval" >}}
 
+{{< chart_line "coldstart_aws_jsnoop_interval" >}}
+
+{{< chart_line "coldstart_aws_csnoop_interval" >}}
+
+{{< chart_line "coldstart_aws_pythonnoop_interval" >}}
+
 Clearly, an idle instance lives for 20 minutes and then gets recycled. All requests after 20 minutes threshold hit another cold start.
 
 {{< chart_scatter "coldstart_aws_scatter" >}}
-
-{{< chart_scatter "coldstart_gcp_scatter" >}}
 
 Links:
 

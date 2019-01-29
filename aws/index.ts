@@ -40,6 +40,16 @@ let vpc = new SmartVpc("lambdavpc", {
     }
 });
 
+let lambdaBucket = new aws.s3.Bucket("lambdas", {});
+let bucketXlDeps = new aws.s3.BucketObject("lambda-xldeps", {
+    bucket: lambdaBucket,
+    source: new asset.FileAsset("./http/jsxldeps.zip")
+});
+let bucketXxxlDeps = new aws.s3.BucketObject("lambda-xxxldeps", {
+    bucket: lambdaBucket,
+    source: new asset.FileAsset("./http/jsxxxldeps.zip")
+});
+
 let experiments = [
     { name: 'js', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', path: 'jsnoop' },
     { name: 'python', runtime: aws.lambda.Python3d6Runtime, handler: 'handler.handler', path: 'pythonnoop' },
@@ -59,6 +69,13 @@ let experiments = [
             subnetIds: vpc.privateSubnetIds
         } 
     },
+    { name: 'jsxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucket: lambdaBucket.bucket, bucketKey: bucketXlDeps.key },
+    { name: 'jsxxxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucket: lambdaBucket.bucket, bucketKey: bucketXxxlDeps.key },
+    { name: 'java', runtime: aws.lambda.Java8Runtime, handler: 'example.Hello', 
+      code: new asset.AssetArchive({
+        "lib/lambda-java-example-1.0-SNAPSHOT.jar": new asset.FileAsset("./http/java/target/lambda-java-example-1.0-SNAPSHOT.jar"),
+    }),
+},
 ];
 
 let lambdas =
@@ -68,9 +85,9 @@ let lambdas =
 
             let lambda = new aws.lambda.Function(name, {
                 runtime: exp.runtime,
-                code: new asset.AssetArchive({
-                    ".": new asset.FileArchive(`./http/${exp.path}`),
-                }),
+                code: exp.code || (exp.path ? new asset.AssetArchive({ ".": new asset.FileArchive(`./http/${exp.path}`) }) : undefined),
+                s3Bucket: exp.bucket,
+                s3Key: exp.bucketKey,
                 timeout: 5,
                 handler: exp.handler,
                 role: role.arn,
@@ -92,20 +109,4 @@ const api = new serverless.apigateway.API(`http-loadtest`, {
     })
 });
 
-let lambda = new aws.lambda.Function("procdump", {
-    runtime: aws.lambda.NodeJS8d10Runtime,
-    code: new asset.AssetArchive({
-        ".": new asset.FileArchive("./http/procdump"),
-    }),
-    timeout: 5,
-    handler: "index.handler",
-    role: role.arn,
-    memorySize: 512
-}, { dependsOn: [fullAccessLambda] });
-
-const api2 = new serverless.apigateway.API(`http-dump`, {
-    routes: [{ method: "GET", path: "dump", handler: lambda }]
-});
-
 export const apiEndpoint = api.url;
-export const api2Endpoint = api2.url.apply(url => url + "dump");

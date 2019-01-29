@@ -43,6 +43,24 @@ const createColdStarts = (prefix: string) => {
         version: "~2"
     });
 
+    const v2jsxl = new FunctionApp(`${prefix}-v2jsxl`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        appInsights,
+        path: "http/v2/jsxldeps",
+        version: "~2"
+    });
+
+    const v2jsxxxl = new FunctionApp(`${prefix}-v2jsxxxl`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        appInsights,
+        path: "http/v2/jsxxxldeps",
+        version: "~2"
+    });
+
     const v2cs = new FunctionApp(`${prefix}-v2cs`, {
         resourceGroup,
         storageAccount,
@@ -54,6 +72,8 @@ const createColdStarts = (prefix: string) => {
 
     return {
         v2js: v2js.url.apply(url => url + "http"),
+        v2jsxl: v2jsxl.url.apply(url => url + "http"),
+        v2jsxxl: v2jsxxxl.url.apply(url => url + "http"),
         v2cs: v2cs.url.apply(url => url + "http"),
     };
 }

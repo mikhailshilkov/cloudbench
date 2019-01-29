@@ -1,4 +1,46 @@
 baseURL = "http://example.org/"
 languageCode = "en-us"
 title = "No Server's Land"
-theme = "mediumish"
+copyright = "Mikhail Shilkov - All rights reserved"
+
+summaryLength = 25
+enableEmoji = true
+
+[params]
+#  logo = "/images/logo.png"
+  description ="the clean blog!"
+  #mailchimp = "you can provide a mailchimp-link here"
+
+[params.author]
+  name = "Mikhail Shilkov"
+  thumbnail = "/images/author.png"
+  description = "Creator of this blog."
+
+[params.index]
+  picture = "/images/author.png"
+  title = "Mikhail Shilkov"
+  subtitle = "I'm a unique placeholder. Working here and there!"
+  mdtext = '''
+Currently trying to get this blog running, still don't know what the blog will be about!\
+**This textblock is a demonstration of the mdtext-param.**\
+### This is a markdown heading
+'''
+  alertbar = false
+
+[params.social]
+  github = "mikhailshilkov"
+  linkedin = "mikhailshilkov"
+  medium = "MikhailShilkov"
+  twitter = "MikhailShilkov"
+
+## Main Menu
+[[menu.main]]
+    name = "Blog"
+    weight = 100
+    identifier = "blog"
+    url = "/blog"
+[[menu.main]]
+    name = "Author"
+    identifier = "author"
+    weight = 200
+    url = "/"

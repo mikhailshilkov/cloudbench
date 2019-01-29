@@ -1,0 +1,23 @@
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load("current", {packages:["corechart"]});
+    function addChart(make) {
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+            const data = new google.visualization.DataTable();
+
+            const options = {
+                height: 420,  
+                chartArea: { width: '85%', height: '80%' },
+                legend: 'none',
+                hAxis: {},
+                vAxis: {}
+            };
+            const chart = make(data, options);
+            options.hAxis.textStyle = options.hAxis.titleTextStyle 
+                = options.vAxis.textStyle = options.vAxis.titleTextStyle = { fontName: 'Merriweather' };
+
+            chart.draw(data, options);
+        }
+    }
+</script>

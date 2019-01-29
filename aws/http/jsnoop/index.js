@@ -6,7 +6,7 @@ buf = buf.split("/");
 
 const instance = `AWS:${buf[1].substring(13)}`;
 const memory = process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE;
-const role = process.env.CLOUDBENCH_ROLE;
+const role = process.env.CLOUDBENCH_ROLE || '';
 let count = 0;
 
 exports.handler = async (event) => {
