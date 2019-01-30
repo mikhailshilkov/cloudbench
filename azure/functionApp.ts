@@ -10,6 +10,7 @@ export interface FunctionAppOptions {
     readonly appInsights: azure.appinsights.Insights;
     readonly path: string;
     readonly version: string;
+    readonly runtime: string;
     readonly appSettings?: object;
 }
 
@@ -59,6 +60,7 @@ export class FunctionApp extends pulumi.ComponentResource {
                 "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
                 "ApplicationInsights:InstrumentationKey": options.appInsights.instrumentationKey,
                 "APPINSIGHTS_INSTRUMENTATIONKEY": options.appInsights.instrumentationKey,
+                "FUNCTIONS_WORKER_RUNTIME": options.runtime,
                 ...options.appSettings
             },
         

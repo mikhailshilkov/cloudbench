@@ -25,10 +25,26 @@ const bucketObjectXxxlDeps = new gcp.storage.BucketObject("cloudbench-jsxxxldeps
     }),
 });
 
+const bucketObjectPython = new gcp.storage.BucketObject("cloudbench-python-bucket-object", {
+    bucket: bucket.name,
+    source: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/pythonnoop"),
+    }),
+});
+
+const bucketObjectGo = new gcp.storage.BucketObject("cloudbench-go-bucket-object", {
+    bucket: bucket.name,
+    source: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/gonoop"),
+    }),
+});
+
 let functions = [
     { name: 'coldstartjs', blob: bucketObjectJsNoOp },
     { name: 'coldjsxldeps', blob: bucketObjectXlDeps },
     { name: 'coldjsxxxldeps', blob: bucketObjectXxxlDeps },
+    { name: 'coldstartpython', blob: bucketObjectPython, runtime: "python37" },
+    { name: 'coldstartgo', blob: bucketObjectGo, runtime: "go111", handler: "Handler" },
 ];
 
 let coldStartFuncs = 
@@ -39,8 +55,9 @@ functions.map(f => {
                 : `cloudbench-gcp-${f.name}-func-${memory}`;
             return new gcp.cloudfunctions.Function(name, {
                 sourceArchiveBucket: bucket.name,
+                runtime: f.runtime,
                 sourceArchiveObject: f.blob.name,
-                entryPoint: "handler",
+                entryPoint: f.handler || "handler",
                 triggerHttp: true,
                 availableMemoryMb: memory
             });

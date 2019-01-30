@@ -49,11 +49,15 @@ let bucketXxxlDeps = new aws.s3.BucketObject("lambda-xxxldeps", {
     bucket: lambdaBucket,
     source: new asset.FileAsset("./http/jsxxxldeps.zip")
 });
+let bucketGo = new aws.s3.BucketObject("lambda-go", {
+    bucket: lambdaBucket,
+    source: new asset.FileAsset("./http/gonoop/main.zip")
+});
 
 let experiments = [
     { name: 'js', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', path: 'jsnoop' },
     { name: 'python', runtime: aws.lambda.Python3d6Runtime, handler: 'handler.handler', path: 'pythonnoop' },
-    { name: 'cs', runtime: aws.lambda.DotnetCore2d0Runtime, handler: 'app::app.Functions::GetAsync', path: 'csnoop/bin/Debug/netcoreapp2.0/publish' },
+    { name: 'cs', runtime: aws.lambda.DotnetCore2d1Runtime, handler: 'app::app.Functions::GetAsync', path: 'csnoop/bin/Debug/netcoreapp2.1/publish' },
     { 
         name: 'vpc', 
         runtime: aws.lambda.NodeJS8d10Runtime, 
@@ -69,13 +73,15 @@ let experiments = [
             subnetIds: vpc.privateSubnetIds
         } 
     },
-    { name: 'jsxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucket: lambdaBucket.bucket, bucketKey: bucketXlDeps.key },
-    { name: 'jsxxxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucket: lambdaBucket.bucket, bucketKey: bucketXxxlDeps.key },
+    { name: 'jsxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucketKey: bucketXlDeps.key },
+    { name: 'jsxxxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucketKey: bucketXxxlDeps.key },
     { name: 'java', runtime: aws.lambda.Java8Runtime, handler: 'example.Hello', 
       code: new asset.AssetArchive({
-        "lib/lambda-java-example-1.0-SNAPSHOT.jar": new asset.FileAsset("./http/java/target/lambda-java-example-1.0-SNAPSHOT.jar"),
-    }),
-},
+            "lib/lambda-java-example-1.0-SNAPSHOT.jar": new asset.FileAsset("./http/java/target/lambda-java-example-1.0-SNAPSHOT.jar"),
+        })
+    },
+    { name: 'ruby', runtime: "ruby2.5", handler: 'lambda_function.lambda_handler', path: 'rubynoop' },
+    { name: 'go', runtime: aws.lambda.Go1dxRuntime, handler: 'main', bucketKey: bucketGo.key },
 ];
 
 let lambdas =
@@ -86,7 +92,7 @@ let lambdas =
             let lambda = new aws.lambda.Function(name, {
                 runtime: exp.runtime,
                 code: exp.code || (exp.path ? new asset.AssetArchive({ ".": new asset.FileArchive(`./http/${exp.path}`) }) : undefined),
-                s3Bucket: exp.bucket,
+                s3Bucket: exp.bucketKey ? lambdaBucket.bucket : undefined,
                 s3Key: exp.bucketKey,
                 timeout: 5,
                 handler: exp.handler,

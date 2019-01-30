@@ -40,7 +40,8 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageContainer,
         appInsights,
         path: "http/v2/jsnoop",
-        version: "~2"
+        version: "~2",
+        runtime: "node"
     });
 
     const v2jsxl = new FunctionApp(`${prefix}-v2jsxl`, {
@@ -49,7 +50,8 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageContainer,
         appInsights,
         path: "http/v2/jsxldeps",
-        version: "~2"
+        version: "~2",
+        runtime: "node"
     });
 
     const v2jsxxxl = new FunctionApp(`${prefix}-v2jsxxxl`, {
@@ -58,7 +60,8 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageContainer,
         appInsights,
         path: "http/v2/jsxxxldeps",
-        version: "~2"
+        version: "~2",
+        runtime: "node"
     });
 
     const v2cs = new FunctionApp(`${prefix}-v2cs`, {
@@ -67,7 +70,38 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageContainer,
         appInsights,
         path: "http/v2/csnoop/bin/Debug/netcoreapp2.1",
-        version: "~2"
+        version: "~2",
+        runtime: "dotnet"
+    });
+
+    const java = new FunctionApp(`${prefix}-java`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        appInsights,
+        path: "http/v2/javanoop/target/azure-functions/v2java",
+        version: "~2",
+        runtime: "java"
+    });
+
+    const v1js = new FunctionApp(`${prefix}-v1js`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        appInsights,
+        path: "http/v1/jsnoop",
+        version: "~1",
+        runtime: "node"
+    });
+
+    const v1cs = new FunctionApp(`${prefix}-v1cs`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        appInsights,
+        path: "http/v1/csnoop/bin/Debug/net461",
+        version: "~1",
+        runtime: "dotnet"
     });
 
     return {
@@ -75,17 +109,24 @@ const createColdStarts = (prefix: string) => {
         v2jsxl: v2jsxl.url.apply(url => url + "http"),
         v2jsxxl: v2jsxxxl.url.apply(url => url + "http"),
         v2cs: v2cs.url.apply(url => url + "http"),
+        java: java.url.apply(url => url + "http"),
+        v1js: v1js.url.apply(url => url + "http"),
+        v1cs: v1cs.url.apply(url => url + "http"),
     };
 }
 
-const blobmeasure = new FunctionApp(`blobmeasure-v2js`, {
-    resourceGroup,
-    storageAccount,
-    storageContainer: runAsPackageContainer,
-    appInsights,
-    path: "http/v2/jsblobmeasure",
-    version: "~2"
+const linuxResourceGroup = new azure.core.ResourceGroup('cb-linux-rg', {
+    location: "West Europe",
+});
+
+const linuxStorageAccount = new azure.storage.Account('cblinuxsa', {
+    resourceGroupName: linuxResourceGroup.name,
+    location: linuxResourceGroup.location,
+    accountKind: "StorageV2",
+    accountTier: "Standard",
+    accountReplicationType: "LRS",
 });
 
 export const coldStarts = createColdStarts(`${name}-cold`);
-export const blobmeasureUrl = blobmeasure.url.apply(url => url + "http");
+export const linuxResourceGroupName = linuxResourceGroup.name;
+export const linuxStorageAccountName = linuxStorageAccount.name;

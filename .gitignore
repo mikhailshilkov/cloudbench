@@ -71,3 +71,4 @@ appsettings.json
 
 *.zip
 target/
+.python_packages
