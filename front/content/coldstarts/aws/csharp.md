@@ -6,7 +6,7 @@ draft: false
 
 Todo
 
-{{< chart_hist "coldstart_aws_cs" >}}
+{{< chart_hist "coldstart_aws_csharp" >}}
 
 Links:
 

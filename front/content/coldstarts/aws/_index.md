@@ -1,6 +1,7 @@
 ---
 title: "Cold Starts in AWS"
 comments: false
+image: /images/aws.png
 ---
 ### Cold Starts in AWS
 

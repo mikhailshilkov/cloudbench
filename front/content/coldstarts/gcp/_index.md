@@ -1,6 +1,7 @@
 ---
 title: "Cold Starts in GCP"
 comments: false
+image: /images/gcp.png
 ---
 ### Cold Starts in GCP
 

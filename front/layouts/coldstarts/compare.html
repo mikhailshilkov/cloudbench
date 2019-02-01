@@ -3,15 +3,24 @@
 {{ end }}
 
 {{ define "main" }}
-    {{- partial "_shared/title.html" . -}}
     <div class="main-content">
+
+        <div class="mainheading">
+            <!-- Post Title -->
+            <h1 class="posttitle">{{ .Title }}</h1> 
+        </div>
+
         <section class="recent-posts">            
             <div class="section-title">                
-                <h2><span>All Content</span></h2>                
+                <h2><span>Major Cloud Providers</span></h2>
             </div>            
             <div class="row listrecent">
-                {{ $coldstarts := .GetPage "/coldstarts/compare" }}
-                {{- partial "list-partials/postbox.html" $coldstarts -}}
+                {{ $post_paginator := slice "/coldstarts/aws" "/coldstarts/azure" "/coldstarts/gcp" }}
+                {{ range $post_paginator }}
+                    {{ $page := $.GetPage . }}
+                    {{- partial "list-partials/postbox.html" $page -}}
+                {{end}}
+
             </div>
         </section>
     </div>

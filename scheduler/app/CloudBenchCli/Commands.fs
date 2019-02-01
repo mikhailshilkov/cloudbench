@@ -81,9 +81,9 @@ module Commands =
                         |> List.concat
 
                     let durations = coldStartDurations responses
-                    storage.Save (sprintf "ColdStart_%s_%s.json" cloud group.Label) durations
+                    storage.Save (sprintf "ColdStart_%s_%s.json" cloud group.Name) durations
 
-                    do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Label) files
+                    do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
 
                     return group, responses
                 })

@@ -36,6 +36,7 @@ type ChartRoot = {
 }
 
 type LegendItem = {
+    Name: string
     Label: string
     Order: int
     Color: string option

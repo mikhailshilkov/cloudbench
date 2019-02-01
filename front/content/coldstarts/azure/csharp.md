@@ -7,7 +7,7 @@ tags: ["Cold Starts", "Azure", "C#", ".NET"]
 
 Todo
 
-{{< chart_hist "coldstart_azure_cs" >}}
+{{< chart_hist "coldstart_azure_csharp" >}}
 
 Links:
 

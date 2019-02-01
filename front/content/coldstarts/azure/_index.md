@@ -1,6 +1,7 @@
 ---
 title: "Cold Starts in Azure"
 comments: false
+image: /images/azure.png
 ---
 ### Cold Starts in Azure
 
