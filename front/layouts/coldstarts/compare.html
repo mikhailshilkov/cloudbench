@@ -12,6 +12,19 @@
 
         <section class="recent-posts">            
             <div class="section-title">                
+                <h2><span>Getting Started</span></h2>
+            </div>            
+            <div class="row listrecent">
+                {{ $post_paginator := slice "/coldstarts/big3" "/coldstarts/define" "/coldstarts/methodology" }}
+                {{ range $post_paginator }}
+                    {{ $page := $.GetPage . }}
+                    {{- partial "list-partials/postbox.html" $page -}}
+                {{end}}
+
+            </div>
+        </section>
+        <section class="recent-posts">            
+            <div class="section-title">                
                 <h2><span>Major Cloud Providers</span></h2>
             </div>            
             <div class="row listrecent">

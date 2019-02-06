@@ -62,3 +62,10 @@ blockquote.pullquote {
 figure svg {
     border: 1px solid #ebebeb;
 }
+
+.article-post table {
+    margin-bottom: 44px;
+}
+.article-post table td {
+    padding-right: 30px;
+}
