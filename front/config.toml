@@ -8,7 +8,7 @@ enableEmoji = true
 
 [params]
 #  logo = "/images/logo.png"
-  description ="the clean blog!"
+  description ="Open-source, open-data benchmarks of managed cloud services"
   #mailchimp = "you can provide a mailchimp-link here"
 
 [params.author]

@@ -10,8 +10,11 @@
                 <h2><span>All Content</span></h2>                
             </div>            
             <div class="row listrecent">
-                {{ $coldstarts := .GetPage "/coldstarts" }}
-                {{- partial "list-partials/postbox.html" $coldstarts -}}
+                {{ $post_paginator := slice "/coldstarts" "/blog" }}
+                {{ range $post_paginator }}
+                    {{ $page := $.GetPage . }}
+                    {{- partial "list-partials/postbox.html" $page -}}
+                {{end}}
             </div>
         </section>
     </div>
