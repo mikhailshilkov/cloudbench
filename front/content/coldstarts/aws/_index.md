@@ -1,14 +1,80 @@
 ---
-title: "Cold Starts in AWS"
+title: "Cold Starts in AWS Lambda"
+date: 2019-02-06
 comments: false
+tags: ["Cold Starts", "AWS", "AWS Lambda"]
 image: /images/aws.png
 ---
-### Cold Starts in AWS
 
-TODO Cold Starts in AWS
+This article describes AWS Lambda&mdash;the dynamically scaled and billed-per-execution compute service. Instances of Lambdas are added and removed dynamically. When a new instance handles its first request, the response time increases, which is called a **cold start**.
 
-{{< chart_interval "coldstart_aws_bylanguage" >}}
+Read more: [Cold Starts in Serverless Functions](/coldstarts/define)
 
-{{< chart_interval "coldstart_aws_bymemory" >}}
+When Does Cold Start Happen?
+----------------------------
 
-{{< chart_interval "coldstart_aws_byvpc" >}}
+The very first cold start happens when the first request comes in after a deployment. 
+
+After that request is processed, the instance is kept alive to be reused for subsequent requests. There is no predefined threshold after the instance gets recycled, the empiric data show some variance of idle period.
+
+The following chart estimates the probability of an instance to be recycled after the given period of inactivity:
+
+{{< chart_line 
+    "coldstart_aws_interval" 
+    "Probability of a cold start happening before minute X" >}}
+
+An idle instance almost always stays alive for at least **25 minutes**. Then, the probability of it being disposed slowly starts to grow and reaches 100% somewhere after **1 hour** since the last request.
+
+Read more: [When Does Cold Start Happen on AWS Lambda?](/coldstarts/aws/intervals)
+
+How Slow Are Cold Starts?
+-------------------------
+
+The following chart shows the typical range of cold starts in AWS Lambda, broken down per language. The darker ranges are most common 67% of durations, lighter ranges include 95%.
+
+{{< chart_interval 
+    "coldstart_aws_bylanguage"
+    "Typical cold start durations per language" >}}
+
+Python seems to be the fastest with most cold starts completed within **400 ms**. JavaScript, Go, Java, and Ruby are all comparable and almost always start within **1 second**. C# is an obvious underdog with cold starts spanning between **1 and 5 seconds**. 
+
+Read the detailed statistics per language: [TODO](TODO).
+
+Does Instance Size Matter?
+--------------------------
+
+AWS Lambdas have a setting to define the memory size that gets allocated to a single instance of a function. Are biggest instances faster to load?
+
+{{< chart_interval 
+    "coldstart_aws_bymemory"
+    "Comparison of cold start durations per instance size" >}}
+
+There is no visible difference in cold start duration of different instance sizes.
+
+Read more: [TODO](/coldstarts/aws/todo)
+
+Does Package Size Matter?
+-------------------------
+
+The above charts show the statistics for tiny "Hello World"-style functions. Adding dependencies and thus increasing the deployed package size will further increase the cold start durations.
+
+The following chart compares three JavaScript functions with various number of referenced NPM packages:
+
+{{< chart_interval 
+    "coldstart_aws_bydependencies"
+    "Comparison of cold start durations per deployment size (zipped)" >}}
+
+TODO
+
+Read more: [TODO](/coldstarts/aws/todo)
+
+What Is The Effect Of VPC Access?
+---------------------------------
+
+AWS Lambda might need to access resources inside Amazon Virtual Private Cloud (Amazon VPC). Configuring VPC access will significantly slow down the cold starts:
+
+{{< chart_interval 
+    "coldstart_aws_byvpc"
+    "Comparison of cold start durations of the same Lambda with and without VPC access" >}}
+
+Some VPC-enabled cold starts are still fast, but very often they are much slower and can get up to **17 seconds**.

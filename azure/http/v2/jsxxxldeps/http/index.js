@@ -40,7 +40,7 @@ module.exports = async function(context) {
     body: `Azure_JSXXXLDeps_${instance}`,
     headers: {
         "Content-Type": "text/plain",
-        "X-CB-Name": "Azure_XXXLDeps",
+        "X-CB-Name": "Azure_JSXXXLDeps",
         "X-CB-Count": count,
         "X-CB-Instance": instance
     } 

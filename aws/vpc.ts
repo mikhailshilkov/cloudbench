@@ -261,48 +261,48 @@ export class SmartVpc extends ComponentResource implements VpcOutputs {
         this.privateSubnetIds = privateSubnets.map(subnet => subnet.id);
 
         // NAT Gateways for each private subnet
-        const privateRouteTables = privateSubnets.map((subnet, index) => {
-            const subnetParent = {parent: subnet};
-            const privateRouteTableTags = Object.assign({
-                Name: `${inputs.description} Private RT ${index + 1}`,
-            }, inputs.baseTags);
-            const privateRouteTable = new aws.ec2.RouteTable(`${baseName}-private-rt-${index + 1}`, {
-                vpcId: vpc.id,
-                tags: privateRouteTableTags,
-            }, subnetParent);
+        // const privateRouteTables = privateSubnets.map((subnet, index) => {
+        //     const subnetParent = {parent: subnet};
+        //     const privateRouteTableTags = Object.assign({
+        //         Name: `${inputs.description} Private RT ${index + 1}`,
+        //     }, inputs.baseTags);
+        //     const privateRouteTable = new aws.ec2.RouteTable(`${baseName}-private-rt-${index + 1}`, {
+        //         vpcId: vpc.id,
+        //         tags: privateRouteTableTags,
+        //     }, subnetParent);
 
-            const eipTags = Object.assign({
-                Name: `${inputs.description} NAT EIP ${index + 1}`,
-            }, inputs.baseTags);
+        //     const eipTags = Object.assign({
+        //         Name: `${inputs.description} NAT EIP ${index + 1}`,
+        //     }, inputs.baseTags);
 
-            // Elastic IP
-            const eip = new aws.ec2.Eip(`${baseName}-nat-eip-${index + 1}`, {
-                tags: eipTags,
-            }, subnetParent);
+        //     // Elastic IP
+        //     const eip = new aws.ec2.Eip(`${baseName}-nat-eip-${index + 1}`, {
+        //         tags: eipTags,
+        //     }, subnetParent);
 
-            // Create the NAT Gateway in the corresponding indexed PUBLIC subnet
-            const natGatewayTags = Object.assign({
-                Name: `${inputs.description} NAT GW ${index + 1}`,
-            }, inputs.baseTags);
-            const natGateway = new aws.ec2.NatGateway(`${baseName}-nat-gw-${index + 1}`, {
-                allocationId: eip.id,
-                subnetId: publicSubnets[index].id,
-                tags: natGatewayTags,
-            }, subnetParent);
+        //     // Create the NAT Gateway in the corresponding indexed PUBLIC subnet
+        //     const natGatewayTags = Object.assign({
+        //         Name: `${inputs.description} NAT GW ${index + 1}`,
+        //     }, inputs.baseTags);
+        //     const natGateway = new aws.ec2.NatGateway(`${baseName}-nat-gw-${index + 1}`, {
+        //         allocationId: eip.id,
+        //         subnetId: publicSubnets[index].id,
+        //         tags: natGatewayTags,
+        //     }, subnetParent);
 
-            const privateRouteTableParent = {parent: privateRouteTable};
-            new aws.ec2.Route(`${baseName}-route-private-sn-to-nat-${index + 1}`, {
-                routeTableId: privateRouteTable.id,
-                destinationCidrBlock: "0.0.0.0/0",
-                gatewayId: natGateway.id,
-            }, privateRouteTableParent);
+        //     const privateRouteTableParent = {parent: privateRouteTable};
+        //     new aws.ec2.Route(`${baseName}-route-private-sn-to-nat-${index + 1}`, {
+        //         routeTableId: privateRouteTable.id,
+        //         destinationCidrBlock: "0.0.0.0/0",
+        //         gatewayId: natGateway.id,
+        //     }, privateRouteTableParent);
 
-            new aws.ec2.RouteTableAssociation(`${baseName}-private-rta-${index + 1}`, {
-                subnetId: subnet.id,
-                routeTableId: privateRouteTable.id,
-            }, subnetParent);
+        //     new aws.ec2.RouteTableAssociation(`${baseName}-private-rta-${index + 1}`, {
+        //         subnetId: subnet.id,
+        //         routeTableId: privateRouteTable.id,
+        //     }, subnetParent);
 
-            return privateRouteTable;
-        });
+        //     return privateRouteTable;
+        // });
     }    
 }

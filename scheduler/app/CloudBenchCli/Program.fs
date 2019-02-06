@@ -34,32 +34,87 @@ let impl parts = async {
         match part with
 
         | ScheduleColdStarts ->
-            do! commands.Trigger (urls "Azure") 20 100
-            //do! commands.Trigger (urls "AWS") 120 100
+            //do! commands.Trigger (urls "Azure") 20 100
+            do! commands.Trigger (urls "AWS") 90 100
             //do! commands.Trigger (urls "GCP") 300 50
         
         | ColdStartIntervals ->
-            do! commands.ColdStartInterval "Azure"
-            do! commands.ColdStartInterval "AWS"
-            do! commands.ColdStartInterval "GCP"
+            //do! commands.ColdStartInterval "Azure" 30 (fun filename -> filename.Contains "Python" |> not)
+            do! commands.ColdStartInterval "AWS" 90 (fun _ -> true)
+            //do! commands.ColdStartInterval "GCP" 300 (fun _ -> true)
         
         | ColdStartDurations ->
+            let languageWindows (name: string) =
+                if name.Contains "Deps" then None
+                elif name.Contains "V1" then None
+                else 
+                    let lang = ((name.Split '_').[1].Replace("Noop", ""))
+                    match lang with
+                    | "CS" -> Some { Name = "CSharp"; Label = "C#"; Order = 1; Color = Some "#178600" }
+                    | "JS" -> Some { Name = "JS"; Label = "JavaScript"; Order = 2; Color = Some "#F1E05A" }
+                    | "Java" -> Some { Name = "Java"; Label = "Java (preview)"; Order = 3; Color = Some "#B07219" }
+                    | _ -> None
+            let languageGcp (name: string) =
+                if name.Contains "Deps" then None
+                else 
+                    let lang = ((name.Split '_').[1].Replace("Noop", ""))
+                    match lang with
+                    | "JS" -> { Name = "JS"; Label = "JavaScript"; Order = 1; Color = Some "#F1E05A" }
+                    | "Go" -> { Name = "Go"; Label = "Go (beta)"; Order = 2; Color = Some "#375EAB" }
+                    | "Python" -> { Name = "Python"; Label = "Python (beta)"; Order = 3; Color = Some "#3572A5" }
+                    | v -> { Name = v; Label = "??" + v; Order = 10; Color = None }
+                    |> Some 
             let language (name: string) =
                 if name.Contains "VPC" then None
                 elif name.Contains "Deps" then None
+                elif name.Contains "V1" then None
                 else 
-                    let lang = ((name.Split '_').[0].Replace("Noop", ""))
+                    let lang = ((name.Split '_').[1].Replace("Noop", ""))
                     match lang with
                     | "JS" -> { Name = "JS"; Label = "JavaScript"; Order = 1; Color = Some "#F1E05A" }
                     | "Python" -> { Name = "Python"; Label = "Python"; Order = 2; Color = Some "#3572A5" }
-                    | "CS" -> { Name = "CSharp"; Label = "C#"; Order = 3; Color = Some "#178600" }
-                    | v -> { Name = v; Label = v; Order = 10; Color = None }
+                    | "Go" -> { Name = "Go"; Label = "Go"; Order = 3; Color = Some "#375EAB" }
+                    | "Java" -> { Name = "Java"; Label = "Java"; Order = 4; Color = Some "#B07219" }
+                    | "Ruby" -> { Name = "Ruby"; Label = "Ruby"; Order = 5; Color = Some "#701516" }
+                    | "CS" -> { Name = "CSharp"; Label = "C#"; Order = 6; Color = Some "#178600" }
+                    | v -> { Name = v; Label = "??" + v; Order = 10; Color = None }
                     |> Some 
+            let v1v2 (name: string) =
+                if name.Contains "Deps" then None
+                elif name.Contains "Python" then None
+                elif name.Contains "Java" then None
+                else 
+                    let lang = ((name.Split '_').[1].Replace("Noop", ""))
+                    let version = if name.Contains "V1" then "V1" else "V2"
+                    match lang, version with
+                    | "JS", "V2" -> { Name = "V2JS"; Label = "V2 JavaScript"; Order = 4; Color = Some "#F1E05A" }
+                    | "CS", "V2" -> { Name = "V2CSharp"; Label = "V2 C#"; Order = 2; Color = Some "#178600" }
+                    | "JS", "V1" -> { Name = "V1JS"; Label = "V1 JavaScript"; Order = 3; Color = Some "#D8C741" }
+                    | "CS", "V1" -> { Name = "V1CSharp"; Label = "V1 C#"; Order = 1; Color = Some "#005300" }
+                    | v, _ -> { Name = v; Label = "??" + v; Order = 10; Color = None }
+                    |> Some 
+            let dependencies (name: string) =
+                if name.Contains "VPC" then None
+                else
+                    let lang = ((name.Split '_').[1].Replace("Noop", ""))
+                    match lang with
+                    | "JS" -> Some { Name = "NoDeps"; Label = "1 KB"; Order = 1; Color = Some "#5BA3F1" }
+                    | "JSXLDeps" -> Some { Name = "XLDeps"; Label = "14 MB"; Order = 2; Color = Some "#2870BE" }
+                    | "JSXXXLDeps" -> Some { Name = "XXXLDeps"; Label = "35 MB"; Order = 3; Color = Some "#003D8B" }
+                    | _ -> None                
             let memory (name: string) =
                 if name.Contains "VPC" then None
                 elif name.Contains "JSNoop" then 
-                    let memory = (name.Split '_').[1]
-                    Some { Name = memory; Label = memory + " MB"; Order = Int32.Parse memory; Color = None }
+                    let memory = (name.Split '_').[2]
+                    let color =
+                        match memory with
+                        | "128" -> Some "#5BA3F1"
+                        | "256" -> Some "#428AD8"
+                        | "512" -> Some "#2870BE"
+                        | "1024" -> Some "#0F57A5"
+                        | "2048" -> Some "#003D8B"
+                        | _ -> None
+                    Some { Name = memory; Label = memory + " MB"; Order = Int32.Parse memory; Color = color }
                 else None
             let vpc (name: string) =                
                 if name.Contains "JSNoop" then 
@@ -68,12 +123,17 @@ let impl parts = async {
                     else { Name = "NoVPC"; Label = "No VPC"; Order = 1; Color = Some "green" }
                     |> Some 
                 else None
-            do! commands.ColdStartDuration "Azure" "language" language
+            //do! commands.ColdStartDuration "Azure" "language" language
+            //do! commands.ColdStartDuration "Azure" "languagewindows" languageWindows
+            //do! commands.ColdStartDuration "Azure" "version" v1v2
+            //do! commands.ColdStartDuration "Azure" "dependencies" dependencies
             do! commands.ColdStartDuration "AWS" "language" language
             do! commands.ColdStartDuration "AWS" "memory" memory
-            do! commands.ColdStartDuration "AWS" "vpc" vpc
-            do! commands.ColdStartDuration "GCP" "language" language
+            //do! commands.ColdStartDuration "AWS" "vpc" vpc
+            do! commands.ColdStartDuration "AWS" "dependencies" dependencies
+            //do! commands.ColdStartDuration "GCP" "language" languageGcp
             do! commands.ColdStartDuration "GCP" "memory" memory
+            //do! commands.ColdStartDuration "GCP" "dependencies" dependencies
 }
 
 [<EntryPoint>]

@@ -15,6 +15,9 @@ addChart((data, options) => {
 
   options.lineWidth = 0;
   options.intervals = { 'style':'boxes' };
+  options.vAxis = {
+    title: 'seconds'
+  };
 
   return new google.visualization.LineChart(document.getElementById('chart_div_{{ $id }}'));
 });

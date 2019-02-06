@@ -10,15 +10,13 @@ addChart((data, options) => {
 
   options.lineWidth = 3;
   options.hAxis = {
-    title: 'Time since previous invocation (minutes)',
-    ticks: [0, 10, 20]
+    title: 'Time since previous invocation (minutes)'
   };
   options.vAxis = {
-    title: 'Probability of a Cold Start',
-    ticks: [0, 1.0]
+    title: 'probability'
   };
 
-  return new google.visualization.LineChart(document.getElementById('chart_div_{{ $id }}'));
+  return new google.visualization.AreaChart(document.getElementById('chart_div_{{ $id }}'));
 });
 </script>
 <figure>

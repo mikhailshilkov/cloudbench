@@ -25,7 +25,7 @@ type ResponseAfterInterval = {
 let coldStartIntervals (responses: PingResponse list) =
     responses
     |> List.pairwise
-    |> List.filter (fun (previous, next) -> next.IsCold || next.Count = previous.Count + 1)
+    |> List.filter (fun (previous, next) -> next.IsCold || (next.Instance = previous.Instance && next.Count = previous.Count + 1))
     |> List.map (fun (previous, next) -> 
         { Interval = next.StartTime - previous.Time
           State = if next.IsCold then Cold else Warm
@@ -49,37 +49,78 @@ let serializePoints xs =
 let percentile (xs: float list) (p: float) = 
     Statistics.Quantile(xs |> Seq.ofList, p / 100.)
 
-let probabilityChart (items: ResponseAfterInterval list) =
-    [0..600]
-    |> List.map (fun x -> float x / 5.)
-    |> List.choose (fun m -> 
-                    let timespan = TimeSpan.FromMinutes m
-                    let colds = 
-                        items 
-                        |> List.filter (fun x -> x.Interval <= timespan)
-                        |> List.filter (fun x -> match x.State with | Cold -> true | Warm -> false) 
-                        |> List.length
-                    let warms = 
-                        items 
-                        |> List.filter (fun x -> x.Interval >= timespan)
-                        |> List.filter (fun x -> match x.State with | Cold -> false | Warm -> true) 
-                        |> List.length
-                    if colds = 0 && warms = 0 then None
-                    else Some (m, (float colds / float (colds + warms)))
+let probabilityChart maxInterval (items: ResponseAfterInterval list) =
+    let values =
+        items 
+        |> List.sortBy (fun x -> x.Interval)
+        |> List.fold (fun (acc, warms) item ->
+            match item.State with
+            | Warm -> acc, item :: warms
+            | Cold -> 
+                match warms with
+                | [] -> acc, warms
+                | warm :: rest ->
+                    if item.Interval - warm.Interval < TimeSpan.FromMinutes 2. 
+                    then warm.Interval :: acc, rest
+                    else acc, []) ([], [])
+        |> fst
+
+    let total = values |> List.length |> float
+    [0..maxInterval]
+    |> List.map (fun m -> 
+                    let timespan = TimeSpan.FromMinutes (float m)
+                    let count = values |> List.filter (fun x -> x < timespan) |> List.length
+                    m, (float count / total)
                 )
     |> List.map (fun (t, v) -> [t :> obj; v :> obj])
     |> serializePoints
 
-let scatterChart (items: ResponseAfterInterval list) =
+let probabilityChart2 maxInterval step (items: ResponseAfterInterval list) =
+    let rec smoothen = function
+        | [] -> []
+        | (va, a) :: rest ->
+            let smaller = rest |> List.takeWhile (fun (_, x) -> x < a)
+            match smaller with
+            | [] -> (va, a) :: smoothen rest
+            | _ ->
+                let sum = a + (smaller |> List.map snd |> List.sum) |> float
+                let count = List.length smaller
+                let avg = sum / float (count + 1)
+                List.append ((va, a) :: smaller |> List.map (fun (vx, _) -> vx, avg)) (rest |> List.skip count |> smoothen)
+                
+    let colds = 
+        items 
+        |> List.filter (fun x -> match x.State with | Cold -> true | Warm -> false)
+    [1..maxInterval/step]
+    |> List.map (fun x -> float (step * x))
+    |> List.map (fun m -> 
+        let startTime = TimeSpan.FromMinutes (m - float step / 2.)
+        let time = TimeSpan.FromMinutes m
+        let endTime = TimeSpan.FromMinutes (m + float step / 2.)
+        let coldCount = 
+            colds 
+            |> List.filter (fun x -> startTime <= x.Interval && x.Interval < endTime)
+            |> List.length
+        let total =
+            items 
+            |> List.filter (fun x -> startTime <= x.Interval && x.Interval < endTime)
+            |> List.length
+        time.TotalMinutes, (float coldCount / float total))
+    |> List.filter (fun (_, y) -> Double.IsNaN y |> not)    
+    |> smoothen
+    |> List.append [(0., 0.)]
+    |> List.map (fun (t, v) -> [t :> obj; v :> obj])
+    |> serializePoints
+
+let scatterChart max (items: ResponseAfterInterval list) =
     let color x =
         match x with
         | Cold -> "blue"
         | Warm -> "red"
         |> sprintf "point {fill-color: %s}"
     items
-    |> List.sortByDescending (fun x -> x.State)
     |> List.map (fun x -> x.Interval.TotalMinutes, x.Response.Latency.TotalSeconds, color x.State, x.Response.Time.ToString ("o"))
-    |> List.filter (fun (i, _, _, _) -> i < 120.0)
+    |> List.filter (fun (i, _, _, _) -> i < (float max))
     |> List.map (fun (t, v, c, dt) -> [t :> obj; v :> obj; c :> obj; dt :> obj])
     |> serializePoints
 

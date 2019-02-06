@@ -6,7 +6,7 @@ open CloudBench.Model
 
 type ICommands =
    abstract member Trigger: name: string list -> interval: int -> count: int -> Async<unit>
-   abstract member ColdStartInterval: name: string -> Async<unit>
+   abstract member ColdStartInterval: name: string -> maxInterval : int -> selector: (string -> bool) -> Async<unit>
    abstract member ColdStartDuration: cloud: string -> grouping: string -> classifier: (string -> LegendItem option) -> Async<unit>
 
 type IWorkflowStarter =
@@ -32,33 +32,41 @@ module Commands =
             return blob.Name, contents
         }
 
-        let coldStartInterval name = async {
-            let! blobs = storage.List (sprintf "ColdStart_%s_" name)
-            let! files = Async.Parallel (blobs |> List.map loadFile)
+        let parseFile (_: string, content: string) = 
+            JsonConvert.DeserializeObject<PingResponse list> content
+            |> List.filter (fun r -> r.Count > 0) // remove failed requests
+
+        let coldStartInterval cloud maxInterval (selector: string -> bool) = async {
+            let! blobs = storage.List (sprintf "ColdStart_%s_" cloud)
+            let matchingBlobs = blobs |> List.filter (fun blob -> selector blob.Name)
+            let! files = Async.Parallel (matchingBlobs |> List.map loadFile)
             let files = files |> List.ofArray
 
             let responses = 
                 files 
-                |> List.map snd 
-                |> List.map JsonConvert.DeserializeObject<PingResponse list>
+                |> List.map parseFile
 
             let intervals = 
                 responses
                 |> List.map (fun rs -> coldStartIntervals rs)
                 |> List.concat
 
-            let chart = probabilityChart intervals
-            do storage.Save (sprintf "ColdStart_%s_Interval.json" name) chart
+            let chart = 
+                match cloud with
+                | "Azure" -> probabilityChart2 maxInterval 1 intervals 
+                | "GCP" -> probabilityChart2 maxInterval 20 intervals 
+                | _ -> probabilityChart maxInterval intervals
+            do storage.Save (sprintf "ColdStart_%s_Interval.json" cloud) chart
 
-            let chart = scatterChart intervals
-            do storage.Save (sprintf "ColdStart_%s_Scatter.json" name) chart
+            let chart = scatterChart maxInterval intervals
+            do storage.Save (sprintf "ColdStart_%s_Scatter.json" cloud) chart
 
-            do storage.Zip (sprintf "ColdStart_%s.zip" name) files
+            do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
         }
 
         let coldStartDuration cloud grouping (classifier: string -> LegendItem option) = async {
 
-            let prefix = sprintf "ColdStart_%s_" cloud
+            let prefix = sprintf "ColdStart_%s" cloud
             let! blobs = storage.List prefix
             let relevant =
                 blobs
@@ -76,8 +84,7 @@ module Commands =
 
                     let responses = 
                         files 
-                        |> List.map snd 
-                        |> List.map JsonConvert.DeserializeObject<PingResponse list>
+                        |> List.map parseFile
                         |> List.concat
 
                     let durations = coldStartDurations responses
@@ -103,7 +110,7 @@ module Commands =
         }
 
         { new ICommands with 
-            member __.ColdStartInterval name = coldStartInterval name
+            member __.ColdStartInterval name maxInterval selector = coldStartInterval name maxInterval selector
             member __.ColdStartDuration cloud grouping classifier = coldStartDuration cloud grouping classifier
             member __.Trigger urls interval count = trigger urls interval count
         }

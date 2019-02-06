@@ -10,7 +10,7 @@
                 <h2><span>All Content</span></h2>                
             </div>            
             <div class="row listrecent">
-                {{ $coldstarts := .GetPage "/coldstarts/compare" }}
+                {{ $coldstarts := .GetPage "/coldstarts" }}
                 {{- partial "list-partials/postbox.html" $coldstarts -}}
             </div>
         </section>
