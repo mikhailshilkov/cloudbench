@@ -1,0 +1,12 @@
+<!-- begin post -->
+<div class="col-md-4 mb-30px card-group">
+    <div class="card h-100">
+        {{ range . }}
+            <div class="card-body">
+                <h2 class="card-title"><a class="text-dark" href="{{ .URL }}">{{ .Title }}</a></h2>
+                <h4 class="card-text">{{ .Summary }}</h4>            
+            </div>                
+        {{end}}
+    </div>
+</div>
+<!-- end post -->

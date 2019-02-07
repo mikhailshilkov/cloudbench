@@ -15,12 +15,12 @@
                 <h2><span>Getting Started</span></h2>
             </div>            
             <div class="row listrecent">
-                {{ $post_paginator := slice "/coldstarts/big3" "/coldstarts/define" "/coldstarts/methodology" }}
-                {{ range $post_paginator }}
-                    {{ $page := $.GetPage . }}
-                    {{- partial "list-partials/postbox.html" $page -}}
-                {{end}}
-
+                {{ $page := $.GetPage "/coldstarts/big3" }}
+                {{- partial "list-partials/featured.html" $page -}}
+                {{ $define := $.GetPage "/coldstarts/define" }}
+                {{ $methodology := $.GetPage "/coldstarts/methodology" }}
+                {{ $pages := slice $define $methodology }}
+                {{- partial "list-partials/summary.html" $pages -}}
             </div>
         </section>
         <section class="recent-posts">            
