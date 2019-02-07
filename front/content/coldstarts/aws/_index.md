@@ -3,7 +3,7 @@ title: "Cold Starts in AWS Lambda"
 date: 2019-02-06
 comments: false
 tags: ["Cold Starts", "AWS", "AWS Lambda"]
-image: /images/aws.png
+image: /images/lambda.jpg
 ---
 
 This article describes AWS Lambda&mdash;the dynamically scaled and billed-per-execution compute service. Instances of Lambdas are added and removed dynamically. When a new instance handles its first request, the response time increases, which is called a **cold start**.

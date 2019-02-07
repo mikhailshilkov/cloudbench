@@ -1,9 +1,8 @@
 ---
 title: "Cold Starts in Google Cloud Functions"
 date: 2019-02-05
-comments: false
 tags: ["Cold Starts", "GCP", "Google Cloud Functions"]
-image: /images/gcp.png
+image: /images/gcloud-functions.png
 ---
 
 This article describes Google Cloud Functions&mdash;the dynamically scaled and billed-per-execution compute service. Instances of Cloud Functions are added and removed dynamically. When a new instance handles its first request, the response time increases, which is called a **cold start**.

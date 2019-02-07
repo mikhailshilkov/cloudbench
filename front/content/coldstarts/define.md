@@ -1,7 +1,7 @@
 ---
 title: "Cold Starts in Serverless Functions"
 date: 2019-01-25
-draft: false
+image: /images/icelake.jpg
 tags: ["Cold Starts"]
 ---
 
