@@ -12,9 +12,12 @@
                 {{ $page := $.GetPage "/blog" }}
                 {{- partial "list-partials/postbox.html" $page -}}
             </div>
-        </section>
+            <div class="row listrecent">
+                {{ $page := $.GetPage "/about/open" }}
+                {{- partial "list-partials/horizontal.html" $page -}}
+        </div>
+    </section>
     </div>
-    {{- partial "_shared/alertbar.html" . -}}
 {{ end }}
 
 {{ define "footer" }}

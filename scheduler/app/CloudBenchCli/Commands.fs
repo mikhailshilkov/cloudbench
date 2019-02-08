@@ -61,7 +61,7 @@ module Commands =
             let chart = scatterChart maxInterval intervals
             do storage.Save (sprintf "ColdStart_%s_Scatter.json" cloud) chart
 
-            do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
+            //do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
         }
 
         let coldStartDuration cloud grouping (classifier: string -> LegendItem option) = async {
@@ -90,7 +90,7 @@ module Commands =
                     let durations = coldStartDurations group.Color responses
                     storage.Save (sprintf "ColdStart_%s_%s.json" cloud group.Name) durations
 
-                    do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
+                    //do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
 
                     return group, responses
                 })

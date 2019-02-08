@@ -33,9 +33,13 @@ How Slow Are Cold Starts?
 
 The following chart shows the comparison of typical cold start durations across all generally available languages of the three clouds. The darker ranges are most common 67% of durations, lighter ranges include 95%.
 
+{{< featured >}}
+
 {{< chart_interval 
     "coldstart__bylanguage"
     "Typical cold start durations per language" >}}
+
+{{< /featured >}}    
 
 AWS clearly leads with all languages but C# being **below 1 second**. GCP start-up usually takes **between 1 and 2 seconds**, while Azure is far slower.
 
@@ -48,10 +52,12 @@ The above charts show the statistics for tiny "Hello World"-style functions. Add
 
 The following chart compares three JavaScript functions with various number of referenced NPM packages:
 
+{{< featured >}}
+
 {{< chart_interval 
     "coldstart__bydependencies"
     "Comparison of cold start durations per deployment size (zipped)" >}}
 
-The trend is quite consistent: bigger packages cause significant slowdown of the cold start. Once again, AWS outperforms its competitors.
+{{< /featured >}}    
 
-Read more: [TODO](/coldstarts/todo)
+The trend is quite consistent: bigger packages cause significant slowdown of the cold start. Once again, AWS outperforms its competitors.

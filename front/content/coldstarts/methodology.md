@@ -24,5 +24,3 @@ Here is what the setup looks like:
 2. The scheduler invokes *the caller*. The caller sends an HTTP request to the cloud function which goes through whatever HTTP front-end the cloud has in front of the function.
 3. The caller *measures* the time it takes to get the HTTP response back. That's the key metric for the cold start estimation.
 4. The caller *logs* the response and the timings to a blob storage.
-
-You can find the raw files with metrics under many charts of this website. Feel free to use it for your own purpose.

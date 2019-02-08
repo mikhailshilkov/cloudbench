@@ -69,3 +69,9 @@ figure svg {
 .article-post table td {
     padding-right: 30px;
 }
+
+/* remove spacing between columns */
+.row.no-gutter [class*='col-'] {
+    padding-right:0;
+    padding-left:0;
+  }  

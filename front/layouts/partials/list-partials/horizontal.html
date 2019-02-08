@@ -1,0 +1,21 @@
+<!-- begin post -->
+<div class="col-md-8 mb-30px card-group">
+    <div class="card">
+        <div class="row">
+            <div class="col-9 order-xs-2">
+                <div class="card-body">
+                    <h2 class="card-title"><a class="text-dark" href="{{ .URL }}">{{ .Title }}</a></h2>
+                    <h4 class="card-text">{{ .Summary }}</h4>            
+                </div>
+            </div>
+            <div class="col-3 order-xs-1 align-middle">
+                <a href="{{ .URL }}" class="align-middle">
+                    {{with .Params.image}}
+                        <img class="img-fluid align-middle" src="{{ . | urlize | relURL }}" alt="A thumbnail image">
+                    {{end}}                
+                </a>
+            </div>
+        </div>
+    </div>        
+</div>
+<!-- end post -->
