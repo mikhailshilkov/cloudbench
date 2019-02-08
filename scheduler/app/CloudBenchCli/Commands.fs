@@ -87,7 +87,7 @@ module Commands =
                         |> List.map parseFile
                         |> List.concat
 
-                    let durations = coldStartDurations responses
+                    let durations = coldStartDurations group.Color responses
                     storage.Save (sprintf "ColdStart_%s_%s.json" cloud group.Name) durations
 
                     do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files

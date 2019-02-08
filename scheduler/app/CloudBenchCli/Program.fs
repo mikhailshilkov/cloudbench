@@ -124,9 +124,9 @@ let impl parts = async {
                     | "JSXLDeps" -> Some { Name = cloud + "XLDeps"; Label = cloud + " 14 MB"; Order = 2 + cloudOrder; Color = Some "#2870BE" }
                     | "JSXXXLDeps" -> Some { Name = cloud + "XXXLDeps"; Label = cloud + " 35 MB"; Order = 3 + cloudOrder; Color = Some "#003D8B" }
                     | _ -> None                
-            let memory (name: string) =
+            let memory (functionName: string) (name: string) =
                 if name.Contains "VPC" then None
-                elif name.Contains "JSNoop" then 
+                elif name.Contains functionName then 
                     let memory = (name.Split '_').[2]
                     let color =
                         match memory with
@@ -150,14 +150,17 @@ let impl parts = async {
             //do! commands.ColdStartDuration "Azure" "version" v1v2
             //do! commands.ColdStartDuration "Azure" "dependencies" dependencies
             //do! commands.ColdStartDuration "AWS" "language" language
-            //do! commands.ColdStartDuration "AWS" "memory" memory
+            //do! commands.ColdStartDuration "AWS" "memory" (memory "JSNoop")
+            do! commands.ColdStartDuration "AWS" "memoryxl" (memory "JSXL")
             //do! commands.ColdStartDuration "AWS" "vpc" vpc
             //do! commands.ColdStartDuration "AWS" "dependencies" dependencies
             //do! commands.ColdStartDuration "GCP" "language" languageGcp
-            //do! commands.ColdStartDuration "GCP" "memory" memory
+            //do! commands.ColdStartDuration "GCP" "memory" (memory "JSNoop")
+            //do! commands.ColdStartDuration "GCP" "memoryxl" (memory "JSXL")
+            //do! commands.ColdStartDuration "GCP" "memoryxxxl" (memory "JSXXXL")
             //do! commands.ColdStartDuration "GCP" "dependencies" dependencies
-            do! commands.ColdStartDuration "" "language" cloudLanguage
-            do! commands.ColdStartDuration "" "dependencies" dependencies
+            //do! commands.ColdStartDuration "" "language" cloudLanguage
+            //do! commands.ColdStartDuration "" "dependencies" dependencies
 }
 
 [<EntryPoint>]

@@ -8,10 +8,13 @@
 
             const options = {
                 height: 420,  
-                chartArea: { width: '85%', height: '80%' },
+                chartArea: { width: '85%', height: '70%' },
                 legend: 'none',
-                hAxis: {},
-                vAxis: {}
+                hAxis: { minValue: 0 },
+                vAxis: {},
+                series: {      
+                    0: { tooltip : false}
+                }
             };
             const chart = make(data, options);
             options.hAxis.textStyle = options.hAxis.titleTextStyle 

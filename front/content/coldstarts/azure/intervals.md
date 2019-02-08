@@ -1,8 +1,7 @@
 ---
 title: "When Does Cold Start Happen on Azure Functions?"
-date: 2019-01-17T06:19:15+01:00
-draft: false
-tags: ["Cold Starts", "Azure"]
+date: 2019-02-07
+tags: ["Cold Starts", "Azure", "Azure Functions"]
 ---
 
 The very first cold start happens when the very first request comes in after a deployment. 
@@ -25,9 +24,4 @@ Here is a formal visualization of the same data. It plots the probability of a c
     "coldstart_azure_interval" 
     "Probability of a cold start happening before minute X" >}}
 
-
-Reference data:
-
-- Chart: Cold and warm latency as a function of interval between two subsequent requests ([JSON](/data/coldstart_azure_scatter.json))
-- Chart: Probability of a cold start happening before minute X ([JSON](/data/coldstart_azure_interval.json))
-- Raw experiment data ([Zipped JSON](/data/coldstart_azure.zip))
+Go back to [Cold Starts in Azure Functions](/coldstarts/azure/).

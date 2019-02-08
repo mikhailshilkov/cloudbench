@@ -33,6 +33,7 @@ let coldStartIntervals (responses: PingResponse list) =
 
 type ChartRoot = {
     points: obj list list
+    color: obj
 }
 
 type LegendItem = {
@@ -42,9 +43,11 @@ type LegendItem = {
     Color: string option
 }
 
-let serializePoints xs = 
-    { points = xs }
+let serializePointsColor c xs = 
+    { points = xs; color = c }
     |> JsonConvert.SerializeObject
+
+let serializePoints xs = serializePointsColor null xs
 
 let percentile (xs: float list) (p: float) = 
     Statistics.Quantile(xs |> Seq.ofList, p / 100.)
@@ -119,28 +122,33 @@ let scatterChart max (items: ResponseAfterInterval list) =
         | Warm -> "red"
         |> sprintf "point {fill-color: %s}"
     items
-    |> List.map (fun x -> x.Interval.TotalMinutes, x.Response.Latency.TotalSeconds, color x.State, x.Response.Time.ToString ("o"))
-    |> List.filter (fun (i, _, _, _) -> i < (float max))
-    |> List.map (fun (t, v, c, dt) -> [t :> obj; v :> obj; c :> obj; dt :> obj])
+    |> List.map (fun x -> x.Interval.TotalMinutes, x.Response.Latency.TotalSeconds, color x.State)
+    |> List.filter (fun (i, _, _) -> i < (float max))
+    |> List.map (fun (t, v, c) -> [t :> obj; v :> obj; c :> obj])
     |> serializePoints
 
-let coldStartDurations (responses: PingResponse list) =
+let calculateColdDurations (responses: PingResponse list) = 
     let (cold, warm) = responses |> List.partition (fun x -> x.IsCold)
 
-    let averageWarm = warm |> List.averageBy (fun x -> x.Latency.TotalSeconds)
-
+    let warmDelay =
+        match warm with
+        | [] -> 0.0
+        | xs -> 
+            let percentiles = percentile (xs |> List.map (fun x -> x.Latency.TotalSeconds))
+            percentiles 16.
+  
     cold
-    |> List.map (fun x -> x.Latency.TotalSeconds - averageWarm)
+    |> List.map (fun x -> x.Latency.TotalSeconds - warmDelay)
     |> List.map (fun v -> if v >= 0.0 then v else 0.0)
+
+let coldStartDurations (color: string option) (responses: PingResponse list) =
+    calculateColdDurations responses
     |> List.map (fun v -> [v :> obj])
-    |> serializePoints
+    |> serializePointsColor (Option.toObj color)
 
 let coldStartComparison (responseMap: Map<LegendItem, PingResponse list>) = 
     let calculateStats (item: LegendItem, responses: PingResponse list) = 
-        let durations = 
-            responses
-            |> List.filter (fun x -> x.IsCold)
-            |> List.map (fun x -> x.Latency.TotalSeconds)            
+        let durations = calculateColdDurations responses
         let percentiles = percentile durations
         let color = 
             item.Color 
