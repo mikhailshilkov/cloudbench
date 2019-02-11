@@ -1,5 +1,5 @@
 ---
-title: Introducing "No Server's Land"
+title: Introducing "Serverless Land"
 date: 2019-02-06
 image: /images/blackboard.jpg
 ---

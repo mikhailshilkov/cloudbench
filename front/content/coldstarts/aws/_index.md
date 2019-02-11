@@ -51,8 +51,7 @@ The following chart compares three JavaScript functions with various number of r
     "coldstart_aws_bydependencies"
     "Comparison of cold start durations per deployment size (zipped)" >}}
 
-TODO
-
+Indeed, the functions with many dependendencies can be 5-10 times slower to start.
 
 Does Instance Size Matter?
 --------------------------
