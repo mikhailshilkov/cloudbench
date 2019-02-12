@@ -13,11 +13,11 @@ enableEmoji = true
 
 [params.author]
   name = "Mikhail Shilkov"
-  thumbnail = "/images/author.png"
-  description = "Creator of this blog."
+  thumbnail = "/images/author.jpg"
+  
 
 [params.index]
-  picture = "/images/author.png"
+  picture = "/images/author.jpg"
   title = "Mikhail Shilkov"
   subtitle = "I'm a unique placeholder. Working here and there!"
   mdtext = '''

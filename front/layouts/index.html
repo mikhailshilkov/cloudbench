@@ -12,7 +12,7 @@
                 {{ $page := $.GetPage "/blog" }}
                 {{- partial "list-partials/postbox.html" $page -}}
             </div>
-            <div class="row listrecent">
+            <div class="row listrecent border-top">
                 {{ $page := $.GetPage "/about/open" }}
                 {{- partial "list-partials/horizontal.html" $page -}}
         </div>

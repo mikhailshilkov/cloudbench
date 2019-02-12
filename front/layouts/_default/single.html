@@ -17,12 +17,6 @@
                 <!-- Post -->                
                 <div class="col-md-9 flex-first flex-md-unordered">
 
-                    <!-- Post Featured Image -->
-                    {{with .Params.image}}
-                        <img class="featured-image img-fluid" src="{{ . | urlize | relURL }}" alt="thumbnail for this post">
-                    {{end}}
-                    <!-- End Featured Image -->                    
-
                     <div class="mainheading">
                         <!-- Post Title -->
                         <h1 class="posttitle">{{ .Title }}</h1> 
@@ -44,7 +38,13 @@
                         {{end}}
                         {{end}}                        
                     </div>
-                    
+
+                    <!-- Post Featured Image -->
+                    {{with .Params.image}}
+                        <img class="featured-image img-fluid" src="{{ . | urlize | relURL }}" alt="thumbnail for this post">
+                    {{end}}
+                    <!-- End Featured Image -->                    
+                
                     <!-- Post Content -->
                     <div class="article-post">
                         {{ .Content}}

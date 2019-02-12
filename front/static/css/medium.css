@@ -1,9 +1,3 @@
-/* 
-Template Name: Mediumish 
-Copyright: Sal, WowThemes.net, https://www.wowthemes.net 
-Version: 1.0.22 
-License: https://www.wowthemes.net/freebies-license/ 
-*/
 .mainheading {
     padding:1rem 0rem;
 }
@@ -112,18 +106,19 @@ section.recent-posts {
     padding-left:0;
 }
 .listfeaturedtag h2.card-title,.listrecent h2.card-title {
-    font-size:1.3rem;
+    font-size:1.4rem;
     font-weight:700;
     line-height: 1.25;
 }
 .listfeaturedtag h4.card-text,.listrecent h4.card-text {
     color:rgba(0,0,0,.44);
-    font-size:0.95rem;
+    font-family:Merriweather;
+    font-size:1rem;
     line-height:1.4;
     font-weight:400;
 }
 .wrapfooter {
-    font-size:12px;
+    font-size:0.9rem;
 }
 .author-thumb {
     width:40px;
@@ -167,7 +162,6 @@ span.post-date,span.post-read {
 span.post-read-more {
     align-items:center;
     display:inline-block;
-    float:right;
     margin-top:8px;
 }
 span.post-read-more a {

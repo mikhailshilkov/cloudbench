@@ -1,7 +1,7 @@
 ---
 title: "Cold Starts in Azure Functions"
 date: 2019-02-07
-image: /images/azurefunction.png
+thumbnail: /images/azure2.jpg
 tags: ["Cold Starts", "Azure", "Azure Functions"]
 ---
 
