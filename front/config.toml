@@ -9,38 +9,28 @@ enableEmoji = true
 [params]
 #  logo = "/images/logo.png"
   description ="Open-source, open-data benchmarks of managed cloud services"
-  #mailchimp = "you can provide a mailchimp-link here"
 
 [params.author]
   name = "Mikhail Shilkov"
   thumbnail = "/images/author.jpg"
   
-
 [params.index]
   picture = "/images/author.jpg"
   title = "Mikhail Shilkov"
-  subtitle = "I'm a unique placeholder. Working here and there!"
-  mdtext = '''
-Currently trying to get this blog running, still don't know what the blog will be about!\
-**This textblock is a demonstration of the mdtext-param.**\
-### This is a markdown heading
-'''
   alertbar = false
 
 [params.social]
-  github = "mikhailshilkov"
-  linkedin = "mikhailshilkov"
-  medium = "MikhailShilkov"
-  twitter = "MikhailShilkov"
+  github = "serverlessland"
+  twitter = "serverlessland"
 
 ## Main Menu
 [[menu.main]]
-    name = "Blog"
+    name = "COLD STARTS"
     weight = 100
-    identifier = "blog"
-    url = "/blog"
+    identifier = "coldstarts"
+    url = "/coldstarts/"
 [[menu.main]]
-    name = "Author"
-    identifier = "author"
+    name = "BLOG"
     weight = 200
-    url = "/"
+    identifier = "blog"
+    url = "/blog/"

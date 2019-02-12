@@ -1,12 +1,9 @@
-<!-- begin post -->
-<div class="col-md-4 mb-30px card-group">
-    <div class="card h-100 border-0 pl-5">
-        {{ range . }}
-            <div class="card-body pl-0 pr-0">
-                <h2 class="card-title"><a class="text-dark" href="{{ .URL }}">{{ .Title }}</a></h2>
-                <h4 class="card-text">{{ .Summary }}</h4>            
-            </div>                
-        {{end}}
-    </div>
+<div class="card h-100 border-0">
+    {{ range . }}
+        <div class="card-body p-0">
+            <h2 class="card-title"><a class="text-dark" href="{{ .URL }}">{{ .Title }}</a></h2>
+            <h4 class="card-text">{{ .Summary }}</h4>            
+            <span class="post-read-more"><a href="{{ .URL }}" title="Read Story">Read more...</a></span>
+        </div>                
+    {{end}}
 </div>
-<!-- end post -->

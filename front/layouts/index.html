@@ -7,8 +7,10 @@
     <div class="main-content">
         <section class="recent-posts">            
             <div class="row listrecent">
-                {{ $page := $.GetPage "/coldstarts" }}
-                {{- partial "list-partials/featured.html" $page -}}
+                <div class="col-md-8 col-sm-12 mb-30px card-group">
+                    {{ $page := $.GetPage "/coldstarts" }}
+                    {{- partial "list-partials/featured.html" $page -}}
+                </div>
                 {{ $page := $.GetPage "/blog" }}
                 {{- partial "list-partials/postbox.html" $page -}}
             </div>

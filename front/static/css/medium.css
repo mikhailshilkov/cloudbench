@@ -259,11 +259,11 @@ blockquote {
 }
 .share p {
     margin-bottom:10px;
-    font-size:0.95rem;
 }
 .share ul li {
     display:inline-block;
     margin-bottom:9px;
+    font-size:1.5rem;
 }
 .share ul {
     padding-left:0;
@@ -359,8 +359,8 @@ blockquote {
    }
 }
 .share,.share a {
-    color:rgba(0,0,0,.44);
-    fill:rgba(0,0,0,.44);
+    color:rgba(0,0,0,.74);
+    fill:rgba(0,0,0,.74);
 }
 .graybg {
     background-color:#fafafa;
