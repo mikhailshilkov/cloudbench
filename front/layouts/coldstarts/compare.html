@@ -15,11 +15,11 @@
                 <h2><span>Overview</span></h2>
             </div>            
             <div class="row listrecent">
-                <div class="col-md-7 col-sm-12 mb-30px card-group">
+                <div class="col-md-8 col-sm-12 mb-30px card-group">
                     {{ $page := $.GetPage "/coldstarts/big3" }}
                     {{- partial "list-partials/featured.html" $page -}}
                 </div>
-                <div class="col-md-4 offset-md-1 mb-30px card-group float-right">
+                <div class="col-md-3 offset-md-1 card-group float-right">
                     {{ $define := $.GetPage "/coldstarts/define" }}
                     {{ $methodology := $.GetPage "/coldstarts/methodology" }}
                     {{ $pages := slice $define $methodology }}

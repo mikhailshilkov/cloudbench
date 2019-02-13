@@ -11,7 +11,7 @@
                     {{ $page := $.GetPage "/coldstarts" }}
                     {{- partial "list-partials/featured.html" $page -}}
                 </div>
-                {{ $page := $.GetPage "/blog" }}
+                {{ $page := $.GetPage "/blog/intro" }}
                 {{- partial "list-partials/postbox.html" $page -}}
             </div>
             <div class="row listrecent border-top">

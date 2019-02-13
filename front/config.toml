@@ -8,7 +8,7 @@ enableEmoji = true
 
 [params]
 #  logo = "/images/logo.png"
-  description ="Open-source, open-data benchmarks of managed cloud services"
+  description ="Experiments with serverless functions and managed cloud services. Open code and open data."
 
 [params.author]
   name = "Mikhail Shilkov"
@@ -33,4 +33,4 @@ enableEmoji = true
     name = "BLOG"
     weight = 200
     identifier = "blog"
-    url = "/blog/"
+    url = "/blog/intro/"

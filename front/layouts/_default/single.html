@@ -21,21 +21,20 @@
                         <!-- Post Title -->
                         <h1 class="posttitle">{{ .Title }}</h1> 
                         <!-- Author Box -->	
-                        {{if isset .Site.Params.author "name"}}
-                        {{if isset .Site.Params.author "description"}}
+                        {{if isset .Params "blog"}}
                         <div class="post-top-meta">
                             <div>
-                            </div>
-                            <div >
-                                <span class="author-description">
-                                    <i class="far fa-star"></i>
-                                    Last updated {{ dateFormat "Jan 2, 2006" .PublishDate }}
-                                    <i class="far fa-clock clock"></i>
-                                    {{ .ReadingTime }} min read
-                                </span>					
+                                <span class="meta-footer-thumb">
+                                    <img class="author-thumb" src="{{ .Site.Params.author.thumbnail | urlize | relURL  }}" alt="{{ .Site.Params.author.name }}">
+                                </span>
+                                <span class="author-meta">
+                                    <span class="post-name">{{ .Site.Params.author.name }}
+                                </span><br/>
+                                <span class="post-date">{{ dateFormat "Jan 2, 2006" .PublishDate }} - {{ .ReadingTime }} min read </span>
+                                </span>
+                                <div class="clearfix"></div>
                             </div>
                         </div>			
-                        {{end}}
                         {{end}}                        
                     </div>
 

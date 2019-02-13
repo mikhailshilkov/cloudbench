@@ -130,10 +130,6 @@ section.recent-posts {
 .post-top-meta {
     margin-bottom:2rem;
 }
-.post-top-meta .author-thumb {
-    width:72px;
-    height:72px;
-}
 .post-top-meta.authorpage .author-thumb {
     margin-top:40px;
 }

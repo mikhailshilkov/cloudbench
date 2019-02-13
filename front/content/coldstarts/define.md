@@ -1,7 +1,8 @@
 ---
-title: "Cold Starts in Serverless Functions"
+title: What Is a Cold Start?
 date: 2019-01-25
-image: /images/icelake.jpg
+thumbnail: /images/dictionary.jpg
+teaser: Definition, mechanics and the reasons they exist
 tags: ["Cold Starts"]
 ---
 

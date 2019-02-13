@@ -6,7 +6,7 @@
     </a>
     <div class="card-body pl-0 pr-0">
         <h2 class="card-title"><a class="text-dark" href="{{ .URL }}">{{ .Title }}</a></h2>
-        <h4 class="card-text">{{ .Summary }}</h4>            
+        <h4 class="card-text">{{ default .Summary .Params.teaser }}</h4>            
         <span class="post-read-more"><a href="{{ .URL }}" title="Read Story">Learn more...</a></span>
     </div>
 </div>
