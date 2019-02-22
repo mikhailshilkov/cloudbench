@@ -1,5 +1,5 @@
 {
-    "name": "cloudbench-aws",
+    "name": "@serverlessland/aws",
     "dependencies": {
         "@pulumi/aws": "latest",
         "@pulumi/pulumi": "latest",

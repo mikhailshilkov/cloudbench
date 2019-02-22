@@ -104,6 +104,18 @@ const createColdStarts = (prefix: string) => {
         runtime: "dotnet"
     });
 
+    const linuxResourceGroup = new azure.core.ResourceGroup('cb-linux-rg', {
+        location: "West Europe",
+    });
+
+    const linuxStorageAccount = new azure.storage.Account('cblinuxsa', {
+        resourceGroupName: linuxResourceGroup.name,
+        location: linuxResourceGroup.location,
+        accountKind: "StorageV2",
+        accountTier: "Standard",
+        accountReplicationType: "LRS",
+    });
+
     return {
         v2js: v2js.url.apply(url => url + "http"),
         v2jsxl: v2jsxl.url.apply(url => url + "http"),
@@ -112,21 +124,28 @@ const createColdStarts = (prefix: string) => {
         java: java.url.apply(url => url + "http"),
         v1js: v1js.url.apply(url => url + "http"),
         v1cs: v1cs.url.apply(url => url + "http"),
+        linuxResourceGroupName: linuxResourceGroup.name,
+        linuxStorageAccountName: linuxStorageAccount.name
     };
 }
 
-const linuxResourceGroup = new azure.core.ResourceGroup('cb-linux-rg', {
-    location: "West Europe",
-});
+const createTiles = (prefix: string) => {
+    let apps =
+        ['a', 'b', 'c']
+        .map(index => {
+            return new FunctionApp(`${prefix}-${index}`, {
+                resourceGroup,
+                storageAccount,
+                storageContainer: runAsPackageContainer,
+                appInsights,
+                path: "http/v2/jsmaptiles",
+                version: "~2",
+                runtime: "node"
+            });
+        });
 
-const linuxStorageAccount = new azure.storage.Account('cblinuxsa', {
-    resourceGroupName: linuxResourceGroup.name,
-    location: linuxResourceGroup.location,
-    accountKind: "StorageV2",
-    accountTier: "Standard",
-    accountReplicationType: "LRS",
-});
+    return apps.map(app => app.url.apply(url => url + "{z}/{x}/{y}.png"));
+}
 
 export const coldStarts = createColdStarts(`${name}-cold`);
-export const linuxResourceGroupName = linuxResourceGroup.name;
-export const linuxStorageAccountName = linuxStorageAccount.name;
+export const tiles = createTiles(`${name}-maptile`);

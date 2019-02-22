@@ -18,6 +18,6 @@
     },
     "files": [
         "index.ts",
-        "queues.ts"
+        "vpc.ts"
     ]
 }

@@ -1,6 +1,0 @@
-{
-    "name": "cloudbench-azure-samplefunc",
-    "dependencies": {
-        "@azure/storage-blob": "^10.2.0-preview"
-    }
-}

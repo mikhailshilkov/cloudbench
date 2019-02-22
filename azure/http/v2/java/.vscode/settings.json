@@ -1,6 +1,0 @@
-{
-  "azureFunctions.projectRuntime": "~2",
-  "azureFunctions.projectLanguage": "Java",
-  "azureFunctions.templateFilter": "Verified",
-  "java.configuration.updateBuildConfiguration": "interactive"
-}

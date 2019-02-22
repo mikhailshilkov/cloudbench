@@ -1,4 +1,0 @@
-config:
-  cloud-azure:location: West Europe
-  cloud:provider: azure
-  cloudbench-scheduler:appInsightsKey: 905430be-f8c4-4b4f-a0e4-e085ccf9afee

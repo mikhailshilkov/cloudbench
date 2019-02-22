@@ -17,7 +17,6 @@
         "strictNullChecks": true
     },
     "files": [
-        "index.ts",
-        "queues.ts"
+        "index.ts"
     ]
 }

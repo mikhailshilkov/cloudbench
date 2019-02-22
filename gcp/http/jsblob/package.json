@@ -1,6 +1,0 @@
-{
-    "name": "cloudbench-gcp-queueblob",
-    "dependencies": {
-        "@google-cloud/storage": "^2.3.4"
-    }
-}

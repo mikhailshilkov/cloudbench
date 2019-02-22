@@ -1,5 +1,5 @@
 {
-    "name": "cloudbench-azure",
+    "name": "@serverlessland/azure",
     "dependencies": {
         "@pulumi/azure": "latest",
         "@pulumi/pulumi": "latest",

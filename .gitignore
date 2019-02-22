@@ -69,7 +69,12 @@ starters.txt
 .vscode/
 appsettings.json
 
+pulumi*
 *.zip
 target/
 .python_packages
 public
+bin/
+obj/
+main
+target/

@@ -1,0 +1,16 @@
+{
+    "name": "@serverlessland/runner",
+    "devDependencies": {
+        "@types/node": "latest",
+        "azure-functions-ts-essentials": "^1.3.2"
+    },
+    "dependencies": {
+        "@pulumi/azure": "latest",
+        "@pulumi/azure-serverless": "latest",
+        "@pulumi/cloud": "latest",
+        "@pulumi/cloud-azure": "latest",
+        "@pulumi/pulumi": "latest",
+        "@types/request": "^2.47.1",
+        "applicationinsights": "^1.0.4"
+    }
+}

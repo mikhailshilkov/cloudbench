@@ -1,0 +1,6 @@
+{
+    "name": "@serverlessland/azure-map-tiles",
+    "dependencies": {
+        "jimp": "^0.6.0"
+    }
+}

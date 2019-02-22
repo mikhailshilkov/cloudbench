@@ -1,6 +1,0 @@
-{
-    "name": "cloudbench-aws-jsblob",
-    "dependencies": {
-        "aws-sdk": "^2.382.0"
-    }
-}
