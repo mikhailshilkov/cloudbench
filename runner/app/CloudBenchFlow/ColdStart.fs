@@ -29,27 +29,37 @@ let ping =
     let impl (url: string) = async {
         let! _ = http.GetAsync "http://35.204.93.82/ping" |> Async.AwaitTask
         let stopwatch = Stopwatch.StartNew ()
-        let! response = http.GetAsync url |> Async.AwaitTask
-        let elapsed = stopwatch.Elapsed
-        if response.StatusCode = HttpStatusCode.OK then
-            let prop x = 
-                if response.Headers.Contains x then response.Headers.GetValues x |> Seq.head
-                else "-1"
+        try
+            let! response = http.GetAsync url |> Async.AwaitTask
+            let elapsed = stopwatch.Elapsed
+            if response.StatusCode = HttpStatusCode.OK then
+                let prop x = 
+                    if response.Headers.Contains x then response.Headers.GetValues x |> Seq.head
+                    else "-1"
+                return {
+                    Name = prop "X-CB-Name"
+                    Instance = prop "X-CB-Instance"
+                    Count = prop "X-CB-Count" |> Int32.Parse
+                    Time = DateTime.UtcNow
+                    Latency = elapsed
+                }
+            else
+                return {
+                    Name = sprintf "PingFailed %A" response.StatusCode
+                    Instance = url
+                    Count = 0
+                    Time = DateTime.UtcNow
+                    Latency = elapsed
+                }
+        with e ->
+            let elapsed = stopwatch.Elapsed
             return {
-                Name = prop "X-CB-Name"
-                Instance = prop "X-CB-Instance"
-                Count = prop "X-CB-Count" |> Int32.Parse
-                Time = DateTime.UtcNow
-                Latency = elapsed
-            }
-        else
-            return {
-                Name = sprintf "PingFailed %A" response.StatusCode
-                Instance = url
-                Count = 0
-                Time = DateTime.UtcNow
-                Latency = elapsed
-            }
+                    Name = sprintf "PingFailed %A" e
+                    Instance = url
+                    Count = 0
+                    Time = DateTime.UtcNow
+                    Latency = elapsed
+                }
     }
     Activity.defineAsync "Ping" impl
 

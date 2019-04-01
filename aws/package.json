@@ -3,7 +3,8 @@
     "dependencies": {
         "@pulumi/aws": "latest",
         "@pulumi/pulumi": "latest",
-        "@pulumi/aws-serverless": "latest"
+        "ip-address": "^5.8.9",
+        "jsbn": "^1.1.0"
     },
     "devDependencies": {
         "@types/node": "^8.0.26",

@@ -1,7 +1,7 @@
 import { asset } from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import * as serverless from "@pulumi/aws-serverless";
 import {SmartVpc} from './vpc';
+import { tilesUrl } from './maptiles';
 
 const policy = {
     "Version": "2012-10-17",
@@ -22,6 +22,10 @@ const role = new aws.iam.Role("lambda-role", {
 let fullAccessLambda = new aws.iam.RolePolicyAttachment("lambda-access", {
     role: role,
     policyArn: aws.iam.AWSLambdaFullAccess,
+});
+let vpcAccessLambda = new aws.iam.RolePolicyAttachment("lambda-vpc-access", {
+    role: role,
+    policyArn: aws.iam.AWSLambdaVPCAccessExecutionRole,
 });
 
 function createColdStarts() {
@@ -94,7 +98,7 @@ function createColdStarts() {
                     memorySize: memory,
                     vpcConfig: exp.vpcConfig,
                     environment: exp.environment
-                }, { dependsOn: [fullAccessLambda] });
+                }, { dependsOn: exp.vpcConfig ? [fullAccessLambda, vpcAccessLambda] : [fullAccessLambda] });
 
                 return {
                     lambda,
@@ -103,9 +107,9 @@ function createColdStarts() {
             })
         }).reduce((x,y) => x.concat(y), []);
 
-    const api = new serverless.apigateway.API(`http-loadtest`, {
+    const api = new aws.apigateway.x.API(`http-loadtest`, {
         routes: lambdas.map (i => {
-            return <serverless.apigateway.Route>{ method: "GET", path: i.path, handler: i.lambda };
+            return <aws.apigateway.x.Route>{ method: "GET", path: i.path, eventHandler: i.lambda };
         })
     });
 
@@ -113,21 +117,28 @@ function createColdStarts() {
 }
 
 function createMapTiles() {
+    let bucket = new aws.s3.Bucket("maptiles", {});
+
     let lambda = new aws.lambda.Function("maptiles", {
         runtime: aws.lambda.NodeJS8d10Runtime,
-        code: new asset.AssetArchive({ ".": new asset.FileArchive('./http/jsmaptiles') }),
+        code: new asset.AssetArchive({ ".": new asset.FileArchive('./http/jsmaptilescolored') }),
         timeout: 5,
         handler: 'index.handler',
         role: role.arn,
-        memorySize: 128
+        memorySize: 2048,
+        environment: {
+            variables:  {
+                'S3_BUCKET': bucket.bucket
+            }
+        }
     }, { dependsOn: [fullAccessLambda] });
 
-    const api = new serverless.apigateway.API(`http-maptiles`, {
-        routes: [{ method: "GET", path: 'tile', handler: lambda }]
-    });
+    const api = new aws.apigateway.x.API(`http-maptiles`, {
+        routes: [{ method: "GET", path: '/{route+}', eventHandler: lambda }]
+    });    
 
     return api.url;
 }
-
 export const coldStartEndpoint = createColdStarts();
 export const mapTileEndpoint = createMapTiles();
+//export const mapTiles = tilesUrl;

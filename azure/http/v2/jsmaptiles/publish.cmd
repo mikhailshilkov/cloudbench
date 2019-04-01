@@ -1,0 +1,1 @@
+func azure functionapp publish cbazure-maptile-b-fad2b50ed1 --nozip

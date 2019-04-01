@@ -1,13 +1,29 @@
 import * as azure from "@pulumi/azure";
+import { FunctionApp } from "./functionApp";
 
-const resourceGroup = new azure.core.ResourceGroup("cloudbench", {
+const resourceGroup = new azure.core.ResourceGroup("cbrunner", {
     location: "North Europe",
 });
 
-const appInsights = new azure.appinsights.Insights(`cloudbench-ai`, {
+const resourceGroupArgs = {
     resourceGroupName: resourceGroup.name,
-    applicationType: 'Web',
-    location: "North Europe"
+    location: resourceGroup.location,
+};
+
+const storageAccount = new azure.storage.Account("cbrunnersa", {
+    ...resourceGroupArgs,
+
+    accountKind: "StorageV2",
+    accountTier: "Standard",
+    accountReplicationType: "LRS",
 });
 
-export const appInsightsKey = appInsights.instrumentationKey;
+const app = new FunctionApp("cbrunnerapp", {
+    resourceGroup,
+    storageAccount,
+    version: "~2",
+    runtime: "dotnet"
+});
+
+
+export const appname = app.name;

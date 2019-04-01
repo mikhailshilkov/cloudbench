@@ -154,9 +154,11 @@ let coldStartComparison (responseMap: Map<LegendItem, PingResponse list>) =
             item.Color 
             |> Option.map (fun color -> sprintf "{color: %s; fill-color: %s}" color color)
             |> Option.defaultValue ""
+        let median = percentiles 50.
         [
             item.Label :> obj
-            percentiles 50. :> obj
+            median :> obj
+            (sprintf "Median: %.1fs" median) :> obj
             percentiles 2.5 :> obj
             percentiles 97.5 :> obj
             percentiles 16. :> obj

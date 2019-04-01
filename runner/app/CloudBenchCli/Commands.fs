@@ -14,6 +14,7 @@ type IWorkflowStarter =
 
 
 module Commands =
+    open System
 
     let workflowStarter (schedulerUrl: string) =
         let http = new HttpClient ()
@@ -70,6 +71,7 @@ module Commands =
             let! blobs = storage.List prefix
             let relevant =
                 blobs
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 03, 13)))
                 |> List.choose (fun blob ->
                     blob.Name.Replace (prefix, "")                    
                     |> classifier 
@@ -91,7 +93,7 @@ module Commands =
                         let durations = coldStartDurations group.Color responses
                         storage.Save (sprintf "raw\\coldstart_%s_%s.json" cloud group.Name) durations
 
-                    //do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
+                    do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
 
                     return group, responses
                 })

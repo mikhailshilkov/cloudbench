@@ -1,0 +1,1 @@
+az functionapp deployment source config-zip -g cbazure-rgb2f83047 -n cbazure-cold-v1js-fa884f69aa --src app.zip

@@ -2,6 +2,7 @@ import { asset } from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 
 const bucket = new gcp.storage.Bucket("cloudbench-bucket", {
+    location: 'europe-west1',
 });
 
 // Cold Start JS function
@@ -54,6 +55,7 @@ functions.map(f => {
                 ? `cloudbench-gcp-${f.name}-func` 
                 : `cloudbench-gcp-${f.name}-func-${memory}`;
             return new gcp.cloudfunctions.Function(name, {
+                region: 'europe-west1',
                 sourceArchiveBucket: bucket.name,
                 runtime: f.runtime,
                 sourceArchiveObject: f.blob.name,
@@ -66,3 +68,28 @@ functions.map(f => {
 
 
 export const coldStartJsUrl = coldStartFuncs.map(f => f.httpsTriggerUrl);
+
+const bucketObjectJsMapTiles = new gcp.storage.BucketObject("cloudbench-jsmaptile-bucket-object", {
+    bucket: bucket.name,
+    source: new asset.AssetArchive({
+        ".": new asset.FileArchive("./http/jsmaptilescolored"),
+    }),
+});
+
+const tilesBucket = new gcp.storage.Bucket("cloudbench-tiles-bucketeu", {
+    location: 'europe-west1'
+});
+
+const tileEuFunction = new gcp.cloudfunctions.Function("maptileseu", {
+    sourceArchiveBucket: bucket.name,
+    sourceArchiveObject: bucketObjectJsMapTiles.name,
+    entryPoint: "handler",
+    triggerHttp: true,
+    availableMemoryMb: 2048,
+    region: 'europe-west1',
+    environmentVariables: {
+        'STORAGE_BUCKET': tilesBucket.name
+    }
+});
+
+export const tileEuFunctionUrl = tileEuFunction.httpsTriggerUrl;

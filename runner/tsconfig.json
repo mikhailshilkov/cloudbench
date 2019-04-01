@@ -18,5 +18,6 @@
     },
     "files": [
         "index.ts",
+        "functionApp.ts"
     ]
 }

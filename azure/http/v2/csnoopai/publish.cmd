@@ -1,0 +1,1 @@
+func azure functionapp publish cbazure-cold-aics-fa6b72d6d7 --nozip

@@ -1,6 +1,4 @@
 const https = require('https');
-const Stream = require('stream').Transform;
-const Jimp = require('jimp');
 const util = require('util');
 const envInstance = process.env["WEBSITE_INSTANCE_ID"];
 const instance = envInstance ? `AZ:${envInstance}` : "LOCAL:LOCAL";
@@ -23,9 +21,7 @@ async function downloadImage(url) {
   });
 }
 
-
 module.exports = async function(context) {
-  const isCold = count == 0;
   count += 1;
 
   const url = 'https://b.tile.openstreetmap.org/' + context.bindingData.path;
@@ -34,13 +30,6 @@ module.exports = async function(context) {
     image = await downloadImage(url);
     context.bindings.outputBlob = image;
   }
-  if (isCold) {
-    const original = await Jimp.read(image);
-    const grey = await original.greyscale();
-    const getBufferAsync = util.promisify(grey.getBuffer.bind(grey));
-    image = await getBufferAsync(Jimp.MIME_PNG);
-  }
-
   context.res = { 
     status: 200, 
     body: image,

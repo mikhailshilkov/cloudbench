@@ -7,8 +7,8 @@ export interface FunctionAppOptions {
     readonly resourceGroup: azure.core.ResourceGroup;
     readonly storageAccount: azure.storage.Account;
     readonly storageContainer: azure.storage.Container;
-    readonly appInsights: azure.appinsights.Insights;
-    readonly path: string;
+    readonly appInsights?: azure.appinsights.Insights;
+    readonly path?: string;
     readonly version: string;
     readonly runtime: string;
     readonly appSettings?: object;
@@ -36,38 +36,43 @@ export class FunctionApp extends pulumi.ComponentResource {
                 size: "Y1",
             },
         });
-                
-        const blob = new azure.storage.ZipBlob(`${name}-b`, {
-            resourceGroupName: options.resourceGroup.name,
-            storageAccountName: options.storageAccount.name,
-            storageContainerName: options.storageContainer.name,
-            type: "block",
+
+        let runFromPackage: pulumi.Input<string | undefined> = "1";
+        if (options.path === "nozip") {
+            runFromPackage = undefined;
+        } else if (options.path) {                
+            const blob = new azure.storage.ZipBlob(`${name}-b`, {
+                resourceGroupName: options.resourceGroup.name,
+                storageAccountName: options.storageAccount.name,
+                storageContainerName: options.storageContainer.name,
+                type: "block",
+            
+                content: new pulumi.asset.FileArchive(options.path)
+            });
+            runFromPackage = signedBlobReadUrl(blob, options.storageAccount, options.storageContainer);
+        }
+
+        const appInsightsKey = options.appInsights ? options.appInsights.instrumentationKey : undefined;
+        const appSettings = {
+            "FUNCTIONS_EXTENSION_VERSION": "~2",
+            "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
+            "ApplicationInsights:InstrumentationKey": appInsightsKey,
+            "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
+            "FUNCTIONS_WORKER_RUNTIME": options.runtime,
+            "WEBSITE_RUN_FROM_PACKAGE": runFromPackage,
+            ...options.appSettings
+        };
         
-            content: new pulumi.asset.FileArchive(options.path)
-        });
-        
-        const codeBlobUrl = signedBlobReadUrl(blob, options.storageAccount, options.storageContainer);
-        
-        const v1js = new azure.appservice.FunctionApp(`${name}-fa`, {
+        const app = new azure.appservice.FunctionApp(`${name}-fa`, {
             ...resourceGroupArgs,
         
             appServicePlanId: appServicePlan.id,
-            storageConnectionString: options.storageAccount.primaryConnectionString,
-        
-            appSettings: {
-                "WEBSITE_RUN_FROM_ZIP": codeBlobUrl,
-                "FUNCTIONS_EXTENSION_VERSION": "~2",
-                "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
-                "ApplicationInsights:InstrumentationKey": options.appInsights.instrumentationKey,
-                "APPINSIGHTS_INSTRUMENTATIONKEY": options.appInsights.instrumentationKey,
-                "FUNCTIONS_WORKER_RUNTIME": options.runtime,
-                ...options.appSettings
-            },
-        
+            storageConnectionString: options.storageAccount.primaryConnectionString,        
+            appSettings,        
             version: options.version
         });
 
-        this.url = v1js.defaultHostname.apply(h => {
+        this.url = app.defaultHostname.apply(h => {
             return `https://${h}/api/`;
         });
     }

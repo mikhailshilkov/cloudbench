@@ -1,0 +1,6 @@
+{
+    "name": "cloudbench-gcp-maptiles",
+    "dependencies": {
+        "@google-cloud/storage": "^2.3.4"
+    }
+}

@@ -34,12 +34,29 @@ const appInsights = new azure.appinsights.Insights(`${name}-ai`, {
 });
 
 const createColdStarts = (prefix: string) => {
+    const nozipjs = new FunctionApp(`${prefix}-nozipjs`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        path: "nozip",
+        version: "~2",
+        runtime: "node"
+    });
+    
+    const externaljs = new FunctionApp(`${prefix}-externaljs`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        path: "http/v2/jsnoopzip",
+        version: "~2",
+        runtime: "node"
+    });
+
     const v2js = new FunctionApp(`${prefix}-v2js`, {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
-        appInsights,
-        path: "http/v2/jsnoop",
+        //path: "http/v2/jsnoop",
         version: "~2",
         runtime: "node"
     });
@@ -48,8 +65,7 @@ const createColdStarts = (prefix: string) => {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
-        appInsights,
-        path: "http/v2/jsxldeps",
+        //path: "http/v2/jsxldeps",
         version: "~2",
         runtime: "node"
     });
@@ -58,8 +74,7 @@ const createColdStarts = (prefix: string) => {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
-        appInsights,
-        path: "http/v2/jsxxxldeps",
+        //path: "http/v2/jsxxxldeps",
         version: "~2",
         runtime: "node"
     });
@@ -68,8 +83,35 @@ const createColdStarts = (prefix: string) => {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
+        //path: "http/v2/csnoop/bin/Debug/netcoreapp2.1",
+        version: "~2",
+        runtime: "dotnet"
+    });
+
+    const appinsightscs = new FunctionApp(`${prefix}-aics`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
         appInsights,
-        path: "http/v2/csnoop/bin/Debug/netcoreapp2.1",
+        //path: "http/v2/csnoop/bin/Debug/netcoreapp2.1",
+        version: "~2",
+        runtime: "dotnet"
+    });
+
+    const nozipcs = new FunctionApp(`${prefix}-nozipcs`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        path: "nozip",
+        version: "~2",
+        runtime: "dotnet"
+    });
+
+    const externalcs = new FunctionApp(`${prefix}-externalcs`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        path: "http/v2/csnoopzip/bin/Debug/netcoreapp2.1/publish",
         version: "~2",
         runtime: "dotnet"
     });
@@ -78,8 +120,7 @@ const createColdStarts = (prefix: string) => {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
-        appInsights,
-        path: "http/v2/javanoop/target/azure-functions/v2java",
+        //path: "http/v2/javanoop/target/azure-functions/v2java",
         version: "~2",
         runtime: "java"
     });
@@ -88,8 +129,8 @@ const createColdStarts = (prefix: string) => {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
-        appInsights,
-        path: "http/v1/jsnoop",
+        //path: "http/v1/jsnoop",
+        path: "nozip",
         version: "~1",
         runtime: "node"
     });
@@ -98,8 +139,8 @@ const createColdStarts = (prefix: string) => {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
-        appInsights,
-        path: "http/v1/csnoop/bin/Debug/net461",
+        //path: "http/v1/csnoop/bin/Debug/net461",
+        path: "nozip",
         version: "~1",
         runtime: "dotnet"
     });
@@ -117,10 +158,15 @@ const createColdStarts = (prefix: string) => {
     });
 
     return {
+        nozipjs: nozipjs.url.apply(url => url + "http"),
+        externaljs: externaljs.url.apply(url => url + "http"),
         v2js: v2js.url.apply(url => url + "http"),
         v2jsxl: v2jsxl.url.apply(url => url + "http"),
         v2jsxxl: v2jsxxxl.url.apply(url => url + "http"),
         v2cs: v2cs.url.apply(url => url + "http"),
+        nozipcs: nozipcs.url.apply(url => url + "http"),
+        externalcs: externalcs.url.apply(url => url + "http"),
+        appinsightscs: appinsightscs.url.apply(url => url + "http"),
         java: java.url.apply(url => url + "http"),
         v1js: v1js.url.apply(url => url + "http"),
         v1cs: v1cs.url.apply(url => url + "http"),
@@ -130,21 +176,15 @@ const createColdStarts = (prefix: string) => {
 }
 
 const createTiles = (prefix: string) => {
-    let apps =
-        ['a', 'b', 'c']
-        .map(index => {
-            return new FunctionApp(`${prefix}-${index}`, {
-                resourceGroup,
-                storageAccount,
-                storageContainer: runAsPackageContainer,
-                appInsights,
-                path: "http/v2/jsmaptiles",
-                version: "~2",
-                runtime: "node"
-            });
-        });
+    let app = new FunctionApp(`${prefix}-b`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        version: "~2",
+        runtime: "node"
+    });
 
-    return apps.map(app => app.url.apply(url => url + "{z}/{x}/{y}.png"));
+    return app.url.apply(url => url + "{z}/{x}/{y}.png");
 }
 
 export const coldStarts = createColdStarts(`${name}-cold`);

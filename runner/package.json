@@ -1,16 +1,18 @@
 {
-    "name": "@serverlessland/runner",
-    "devDependencies": {
-        "@types/node": "latest",
-        "azure-functions-ts-essentials": "^1.3.2"
-    },
+    "name": "@serverlessland/azure",
     "dependencies": {
         "@pulumi/azure": "latest",
-        "@pulumi/azure-serverless": "latest",
-        "@pulumi/cloud": "latest",
-        "@pulumi/cloud-azure": "latest",
         "@pulumi/pulumi": "latest",
-        "@types/request": "^2.47.1",
-        "applicationinsights": "^1.0.4"
+        "azure-storage": "^2.10.1"
+    },
+    "devDependencies": {
+        "@types/node": "^8.0.26",
+        "typescript": "^3.0.3"
+    },
+    "pulumi": {
+        "runtimeDependencies": {
+            "azure-functions-ts-essentials": "^1.3.2",
+            "azure-storage": "^2.10.1"
+        }
     }
 }

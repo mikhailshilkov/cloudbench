@@ -1,0 +1,34 @@
+{
+  "bindings": [
+    {
+      "type": "httpTrigger",
+      "name": "req",
+      "direction": "in",
+      "dataType": "string",
+      "authLevel": "anonymous",
+      "methods": [
+        "get"
+      ],
+      "route": "{*path}"
+    },
+    {
+      "direction": "out",
+      "name": "res",
+      "type": "http"
+    },
+    {
+      "type": "blob",
+      "name": "inputBlob",
+      "path": "maptiles/{path}",
+      "dataType": "binary",
+      "direction": "in"
+    },
+    {
+      "type": "blob",
+      "name": "outputBlob",
+      "path": "maptiles/{path}",
+      "dataType": "binary",
+      "direction": "out"
+    }
+  ]
+}
