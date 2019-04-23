@@ -5,12 +5,13 @@ open Newtonsoft.Json
 open CloudBench.Model
 
 type ICommands =
-   abstract member Trigger: name: string list -> interval: int -> count: int -> Async<unit>
+   abstract member Trigger: name: string list -> mininterval: int -> maxinterval: int -> count: int -> Async<unit>
    abstract member ColdStartInterval: name: string -> maxInterval : int -> selector: (string -> bool) -> Async<unit>
    abstract member ColdStartDuration: cloud: string -> grouping: string -> classifier: (string -> LegendItem option) -> Async<unit>
+   abstract member ExternalDuration: cloud: string -> grouping: string -> classifier: (string -> LegendItem option) -> Async<unit>
 
 type IWorkflowStarter =
-   abstract member RunColdStart: functionUrl: string -> interval: int -> count: int -> Async<unit>
+   abstract member RunColdStart: functionUrl: string -> mininterval: int -> maxinterval: int -> count: int -> Async<unit>
 
 
 module Commands =
@@ -20,8 +21,8 @@ module Commands =
         let http = new HttpClient ()
 
         { new IWorkflowStarter with 
-            member __.RunColdStart functionUrl interval count = async {
-                let url = sprintf "%s?input=%s;%i;%i" schedulerUrl functionUrl interval count
+            member __.RunColdStart functionUrl min max count = async {
+                let url = sprintf "%s?input=%s;%i;%i;%i" schedulerUrl functionUrl min max count
                 do! http.GetAsync url |> Async.AwaitTask |> Async.Ignore
             }
         }
@@ -35,7 +36,6 @@ module Commands =
 
         let parseFile (_: string, content: string) = 
             JsonConvert.DeserializeObject<PingResponse list> content
-            |> List.filter (fun r -> r.Count > 0) // remove failed requests
 
         let coldStartInterval cloud maxInterval (selector: string -> bool) = async {
             let! blobs = storage.List (sprintf "ColdStart_%s_" cloud)
@@ -49,6 +49,7 @@ module Commands =
 
             let intervals = 
                 responses
+                |> List.map (List.filter (fun r -> r.Count > 0)) // remove failed requests
                 |> List.map (fun rs -> coldStartIntervals rs)
                 |> List.concat
 
@@ -71,6 +72,51 @@ module Commands =
             let! blobs = storage.List prefix
             let relevant =
                 blobs
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 03, 23)))
+                |> List.choose (fun blob ->
+                    blob.Name.Replace (prefix, "")                    
+                    |> classifier 
+                    |> Option.map (fun g -> g, blob))
+                |> List.groupBy fst
+                |> List.map (fun (key, value) -> key, value |> List.map snd)
+            let! durationsByGroup =
+                relevant
+                |> List.map (fun (group, blobs) -> async {
+                    let! files = Async.Parallel (blobs |> List.map loadFile)
+                    let files = files |> List.ofArray
+
+                    let responses = 
+                        files 
+                        |> List.map parseFile
+                        |> List.map (List.filter (fun r -> r.Count > 0)) // remove failed requests
+                        |> List.map (List.skip 1)
+                        |> List.concat
+
+                    if cloud <> "" then
+                        let durations = coldStartDurations group.Color responses
+                        storage.Save (sprintf "raw\\coldstart_%s_%s.json" cloud group.Name) durations
+
+                    //do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
+
+                    return group, responses
+                })
+                |> Async.Parallel
+
+            let summary =
+                durationsByGroup
+                |> Map.ofArray
+                |> coldStartComparison calculateColdDurations
+
+            let cloudString = if cloud = "" then "all" else cloud
+            storage.Save (sprintf "coldstart_%s_by%s.json" cloudString grouping) summary
+        }
+
+        let externalDuration cloud grouping (classifier: string -> LegendItem option) = async {
+
+            let prefix = sprintf "ColdStart_%s" cloud
+            let! blobs = storage.List prefix
+            let relevant =
+                blobs
                 |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 03, 13)))
                 |> List.choose (fun blob ->
                     blob.Name.Replace (prefix, "")                    
@@ -88,12 +134,8 @@ module Commands =
                         files 
                         |> List.map parseFile
                         |> List.concat
-
-                    if cloud <> "" then
-                        let durations = coldStartDurations group.Color responses
-                        storage.Save (sprintf "raw\\coldstart_%s_%s.json" cloud group.Name) durations
-
-                    do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
+                    
+                    //do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
 
                     return group, responses
                 })
@@ -102,20 +144,21 @@ module Commands =
             let summary =
                 durationsByGroup
                 |> Map.ofArray
-                |> coldStartComparison
+                |> coldStartComparison calculateExternalDurations
 
             let cloudString = if cloud = "" then "all" else cloud
-            storage.Save (sprintf "coldstart_%s_by%s.json" cloudString grouping) summary
+            storage.Save (sprintf "latency_%s_by%s.json" cloudString grouping) summary
         }
 
-        let trigger (urls: string list) interval count = async {
+        let trigger (urls: string list) min max count = async {
             for url in urls do
-                do! starter.RunColdStart url interval count
+                do! starter.RunColdStart url min max count
         }
 
         { new ICommands with 
             member __.ColdStartInterval name maxInterval selector = coldStartInterval name maxInterval selector
             member __.ColdStartDuration cloud grouping classifier = coldStartDuration cloud grouping classifier
-            member __.Trigger urls interval count = trigger urls interval count
+            member __.ExternalDuration cloud grouping classifier = externalDuration cloud grouping classifier
+            member __.Trigger urls min max count = trigger urls min max count
         }
 

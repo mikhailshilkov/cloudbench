@@ -34,13 +34,14 @@ let impl parts = async {
         match part with
 
         | ScheduleColdStarts ->
-            do! commands.Trigger (urls "Azure") 60 100
-            do! commands.Trigger (urls "AWS") 90 100
-            do! commands.Trigger (urls "GCP") 300 100
+            //do! commands.Trigger (urls "Azure") 60 100
+            //do! commands.Trigger (urls "AWS") 90 100
+            //do! commands.Trigger (urls "GCP") 300 100
+            do! commands.Trigger (urls "External") 25 30 100
         
         | ColdStartIntervals ->
-            //do! commands.ColdStartInterval "Azure" 30 (fun filename -> filename.Contains "Python" |> not)
-            //do! commands.ColdStartInterval "AWS" 90 (fun _ -> true)
+            do! commands.ColdStartInterval "Azure" 30 (fun filename -> filename.Contains "Python" |> not)
+            do! commands.ColdStartInterval "AWS" 90 (fun _ -> true)
             do! commands.ColdStartInterval "GCP" 300 (fun _ -> true)
         
         | ColdStartDurations ->
@@ -163,26 +164,34 @@ let impl parts = async {
                     | "Noop" -> Some { Name = "RunAsPackageLocal" + language; Label = "Local Zip"; Order = 3; Color = Some "#E9B000" }
                     | "ExZip" -> Some { Name = "RunAsPackageExternal" + language; Label = "External Zip"; Order = 4; Color = Some "#E24E42" }
                     | _ -> None
-            //do! commands.ColdStartDuration "Azure" "deploymentjs" (deployment "JS")
-            //do! commands.ColdStartDuration "Azure" "deploymentcs" (deployment "CS")
-            //do! commands.ColdStartDuration "Azure" "language" language
-            //do! commands.ColdStartDuration "Azure" "languagewindows" languageWindows
-            //do! commands.ColdStartDuration "Azure" "version" v1v2
-            //do! commands.ColdStartDuration "Azure" "dependencies" dependencies
-            //do! commands.ColdStartDuration "Azure" "appinsights" appinsights
-            //do! commands.ColdStartDuration "AWS" "language" language
-            //do! commands.ColdStartDuration "AWS" "memory" (memory "JSNoop")
-            //do! commands.ColdStartDuration "AWS" "memoryxl" (memory "JSXL")
-            //do! commands.ColdStartDuration "AWS" "memoryxxxl" (memory "JSXXXL")
-            //do! commands.ColdStartDuration "AWS" "vpc" vpc
-            //do! commands.ColdStartDuration "AWS" "dependencies" dependencies
+            let orders (name: string) =
+                let scenario = (name.Split '_').[1]
+                if scenario.Contains "20190414" then
+                    Some { Name = scenario; Label = "April 14-16"; Order = 1; Color = Some "#008F95" }
+                else
+                    Some { Name = scenario; Label = "April 19-21"; Order = 2; Color = Some "#E9B000" }
+
+            do! commands.ColdStartDuration "Azure" "deploymentjs" (deployment "JS")
+            do! commands.ColdStartDuration "Azure" "deploymentcs" (deployment "CS")
+            do! commands.ColdStartDuration "Azure" "language" language
+            do! commands.ColdStartDuration "Azure" "languagewindows" languageWindows
+            do! commands.ColdStartDuration "Azure" "version" v1v2
+            do! commands.ColdStartDuration "Azure" "dependencies" dependencies
+            do! commands.ColdStartDuration "Azure" "appinsights" appinsights
+            do! commands.ColdStartDuration "AWS" "language" language
+            do! commands.ColdStartDuration "AWS" "memory" (memory "JSNoop")
+            do! commands.ColdStartDuration "AWS" "memoryxl" (memory "JSXL")
+            do! commands.ColdStartDuration "AWS" "memoryxxxl" (memory "JSXXXL")
+            do! commands.ColdStartDuration "AWS" "vpc" vpc
+            do! commands.ColdStartDuration "AWS" "dependencies" dependencies
             do! commands.ColdStartDuration "GCP" "language" languageGcp
             do! commands.ColdStartDuration "GCP" "memory" (memory "JSNoop")
             do! commands.ColdStartDuration "GCP" "memoryxl" (memory "JSXL")
             do! commands.ColdStartDuration "GCP" "memoryxxxl" (memory "JSXXXL")
             do! commands.ColdStartDuration "GCP" "dependencies" dependencies
-            //do! commands.ColdStartDuration "" "language" cloudLanguage
-            //do! commands.ColdStartDuration "" "dependencies" dependencies
+            do! commands.ColdStartDuration "" "language" cloudLanguage
+            do! commands.ColdStartDuration "" "dependencies" dependencies
+            //do! commands.ExternalDuration "orders" "orders" orders
 }
 
 [<EntryPoint>]

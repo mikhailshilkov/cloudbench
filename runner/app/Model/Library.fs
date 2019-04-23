@@ -121,9 +121,12 @@ let scatterChart max (items: ResponseAfterInterval list) =
         | Cold -> "blue"
         | Warm -> "red"
         |> sprintf "point {fill-color: %s}"
+    let r = Random ()
     items
     |> List.map (fun x -> x.Interval.TotalMinutes, x.Response.Latency.TotalSeconds, color x.State)
     |> List.filter (fun (i, _, _) -> i < (float max))
+    |> List.sortBy (fun _ -> r.Next())
+    |> List.truncate 300
     |> List.map (fun (t, v, c) -> [t :> obj; v :> obj; c :> obj])
     |> serializePoints
 
@@ -141,14 +144,19 @@ let calculateColdDurations (responses: PingResponse list) =
     |> List.map (fun x -> x.Latency.TotalSeconds - warmDelay)
     |> List.map (fun v -> if v >= 0.0 then v else 0.0)
 
+let calculateExternalDurations (responses: PingResponse list) = 
+    responses
+    |> List.map (fun x -> x.Latency.TotalSeconds)
+    |> List.filter (fun x -> x > 3.5)
+
 let coldStartDurations (color: string option) (responses: PingResponse list) =
     calculateColdDurations responses
     |> List.map (fun v -> [v :> obj])
     |> serializePointsColor (Option.toObj color)
 
-let coldStartComparison (responseMap: Map<LegendItem, PingResponse list>) = 
+let coldStartComparison calculateDurations (responseMap: Map<LegendItem, PingResponse list>) = 
     let calculateStats (item: LegendItem, responses: PingResponse list) = 
-        let durations = calculateColdDurations responses
+        let durations = calculateDurations responses
         let percentiles = percentile durations
         let color = 
             item.Color 

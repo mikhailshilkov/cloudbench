@@ -1,0 +1,1 @@
+func azure functionapp publish cbazure-cold-v2jsproxies-fae2414663 --nozip

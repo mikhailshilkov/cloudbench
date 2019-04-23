@@ -12,6 +12,7 @@ open System.Net
 let http = new HttpClient ()
 
 type ScenarioOptions = {
+    MinDelay: TimeSpan
     MaxDelay: TimeSpan
     Count: int
 }
@@ -19,9 +20,10 @@ type ScenarioOptions = {
 let scenario =
     fun (options: ScenarioOptions) ->
         let r = Random ()
-        let seconds = int options.MaxDelay.TotalSeconds
+        let minSeconds = int options.MinDelay.TotalSeconds
+        let maxSeconds = int options.MaxDelay.TotalSeconds
         [1 .. options.Count]
-        |> List.map (fun _ -> r.Next seconds)
+        |> List.map (fun _ -> minSeconds + (r.Next (maxSeconds - minSeconds)))
         |> List.map (fun seconds -> TimeSpan.FromSeconds (float seconds))
     |> Activity.define "Scenario"
 
@@ -32,14 +34,15 @@ let ping =
         try
             let! response = http.GetAsync url |> Async.AwaitTask
             let elapsed = stopwatch.Elapsed
+            let alias = url.Split '/' |> Array.last
             if response.StatusCode = HttpStatusCode.OK then
-                let prop x = 
+                let prop x def = 
                     if response.Headers.Contains x then response.Headers.GetValues x |> Seq.head
-                    else "-1"
+                    else def
                 return {
-                    Name = prop "X-CB-Name"
-                    Instance = prop "X-CB-Instance"
-                    Count = prop "X-CB-Count" |> Int32.Parse
+                    Name = prop "X-CB-Name" alias
+                    Instance = prop "X-CB-Instance" "???"
+                    Count = prop "X-CB-Count" "-1" |> Int32.Parse
                     Time = DateTime.UtcNow
                     Latency = elapsed
                 }
@@ -74,14 +77,19 @@ let saveLogs =
     Activity.defineAsync "SaveLogs" impl
 
 let coldStartFlow (param: string) = orchestrator {
-    let (url, maxDelay, count) =
+    let (url, minDelay, maxDelay, count) =
         match param.Split(';') with
-        | [|a|] -> a, 120, 100
-        | [|a; b|] -> a, Int32.Parse b, 100
-        | [|a; b; c|] -> a, Int32.Parse b, Int32.Parse c
+        | [|a|] -> a, 0, 120, 100
+        | [|a; b|] -> a, 0, Int32.Parse b, 100
+        | [|a; b; c|] -> a, 0, Int32.Parse b, Int32.Parse c
+        | [|a; b; c; d|] -> a, Int32.Parse b, Int32.Parse c, Int32.Parse d
         | _ -> failwith "Uknown argument of the workflow"
 
-    let! delays = Activity.call scenario { MaxDelay = TimeSpan.FromMinutes (float maxDelay); Count = count }
+    let parameters = 
+        { MinDelay = TimeSpan.FromMinutes (float minDelay)
+          MaxDelay = TimeSpan.FromMinutes (float maxDelay)
+          Count = count }
+    let! delays = Activity.call scenario parameters
 
     let pingAndPause timespan = orchestrator {
         let! response = Activity.call ping url

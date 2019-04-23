@@ -107,6 +107,15 @@ const createColdStarts = (prefix: string) => {
         runtime: "dotnet"
     });
 
+    const v2jsproxies = new FunctionApp(`${prefix}-v2jsproxies`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        //path: "http/v2/jsnoopproxies",
+        version: "~2",
+        runtime: "node"
+    });    
+
     const externalcs = new FunctionApp(`${prefix}-externalcs`, {
         resourceGroup,
         storageAccount,
@@ -167,6 +176,7 @@ const createColdStarts = (prefix: string) => {
         nozipcs: nozipcs.url.apply(url => url + "http"),
         externalcs: externalcs.url.apply(url => url + "http"),
         appinsightscs: appinsightscs.url.apply(url => url + "http"),
+        v2jsproxies: v2jsproxies.url.apply(url => url + "http"),
         java: java.url.apply(url => url + "http"),
         v1js: v1js.url.apply(url => url + "http"),
         v1cs: v1cs.url.apply(url => url + "http"),
