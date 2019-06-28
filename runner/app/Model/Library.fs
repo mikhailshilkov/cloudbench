@@ -147,7 +147,7 @@ let calculateColdDurations (responses: PingResponse list) =
 let calculateExternalDurations (responses: PingResponse list) = 
     responses
     |> List.map (fun x -> x.Latency.TotalSeconds)
-    |> List.filter (fun x -> x > 3.5)
+    |> List.filter (fun x -> x > 1.5)
 
 let coldStartDurations (color: string option) (responses: PingResponse list) =
     calculateColdDurations responses
@@ -167,6 +167,10 @@ let coldStartComparison calculateDurations (responseMap: Map<LegendItem, PingRes
             item.Label :> obj
             median :> obj
             (sprintf "Median: %.1fs" median) :> obj
+            //percentiles 50. :> obj
+            //percentiles 90. :> obj
+            //percentiles 95. :> obj
+            //percentiles 99. :> obj
             percentiles 2.5 :> obj
             percentiles 97.5 :> obj
             percentiles 16. :> obj

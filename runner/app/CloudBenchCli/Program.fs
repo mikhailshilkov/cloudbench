@@ -34,15 +34,15 @@ let impl parts = async {
         match part with
 
         | ScheduleColdStarts ->
-            //do! commands.Trigger (urls "Azure") 60 100
-            //do! commands.Trigger (urls "AWS") 90 100
-            //do! commands.Trigger (urls "GCP") 300 100
-            do! commands.Trigger (urls "External") 25 30 100
+            do! commands.Trigger (urls "Azure") 0 60 500
+            do! commands.Trigger (urls "AWS") 0 90 500
+            do! commands.Trigger (urls "GCP") 0 300 200
+            //do! commands.Trigger (urls "External") 25 30 100
         
         | ColdStartIntervals ->
             do! commands.ColdStartInterval "Azure" 30 (fun filename -> filename.Contains "Python" |> not)
             do! commands.ColdStartInterval "AWS" 90 (fun _ -> true)
-            do! commands.ColdStartInterval "GCP" 300 (fun _ -> true)
+            do! commands.ColdStartInterval "GCP" 300 (fun filename -> filename.Contains "JSXXXLDeps")
         
         | ColdStartDurations ->
             let languageWindows (name: string) =
@@ -166,8 +166,8 @@ let impl parts = async {
                     | _ -> None
             let orders (name: string) =
                 let scenario = (name.Split '_').[1]
-                if scenario.Contains "20190414" then
-                    Some { Name = scenario; Label = "April 14-16"; Order = 1; Color = Some "#008F95" }
+                if scenario.Contains "20190429" then
+                    Some { Name = scenario; Label = "April 29 - May 1"; Order = 1; Color = Some "#008F95" }
                 else
                     Some { Name = scenario; Label = "April 19-21"; Order = 2; Color = Some "#E9B000" }
 

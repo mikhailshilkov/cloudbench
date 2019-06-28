@@ -39,7 +39,10 @@ module Commands =
 
         let coldStartInterval cloud maxInterval (selector: string -> bool) = async {
             let! blobs = storage.List (sprintf "ColdStart_%s_" cloud)
-            let matchingBlobs = blobs |> List.filter (fun blob -> selector blob.Name)
+            let matchingBlobs = 
+                blobs 
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 04, 24)))
+                |> List.filter (fun blob -> selector blob.Name)
             let! files = Async.Parallel (matchingBlobs |> List.map loadFile)
             let files = files |> List.ofArray
 
@@ -72,7 +75,7 @@ module Commands =
             let! blobs = storage.List prefix
             let relevant =
                 blobs
-                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 03, 23)))
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 04, 24)))
                 |> List.choose (fun blob ->
                     blob.Name.Replace (prefix, "")                    
                     |> classifier 
@@ -117,7 +120,7 @@ module Commands =
             let! blobs = storage.List prefix
             let relevant =
                 blobs
-                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 03, 13)))
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 04, 29)))
                 |> List.choose (fun blob ->
                     blob.Name.Replace (prefix, "")                    
                     |> classifier 

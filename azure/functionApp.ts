@@ -12,6 +12,7 @@ export interface FunctionAppOptions {
     readonly version: string;
     readonly runtime: string;
     readonly appSettings?: object;
+    readonly plan?: azure.appservice.Plan;
 }
 
 export class FunctionApp extends pulumi.ComponentResource {
@@ -25,11 +26,11 @@ export class FunctionApp extends pulumi.ComponentResource {
             location: options.resourceGroup.location,
         };
 
-        const appServicePlan = new azure.appservice.Plan(`${name}-asp`, {
+        const appServicePlan = options.plan || new azure.appservice.Plan(`${name}-asp`, {
             ...resourceGroupArgs,
-        
+
             kind: "FunctionApp",
-        
+
             // https://social.msdn.microsoft.com/Forums/azure/en-US/665c365d-2b86-4a77-8cea-72ccffef216c
             sku: {
                 tier: "Dynamic",
@@ -40,13 +41,13 @@ export class FunctionApp extends pulumi.ComponentResource {
         let runFromPackage: pulumi.Input<string | undefined> = "1";
         if (options.path === "nozip") {
             runFromPackage = undefined;
-        } else if (options.path) {                
+        } else if (options.path) {
             const blob = new azure.storage.ZipBlob(`${name}-b`, {
-                resourceGroupName: options.resourceGroup.name,
+                resourceGroupName: options.storageAccount.resourceGroupName,
                 storageAccountName: options.storageAccount.name,
                 storageContainerName: options.storageContainer.name,
                 type: "block",
-            
+
                 content: new pulumi.asset.FileArchive(options.path)
             });
             runFromPackage = signedBlobReadUrl(blob, options.storageAccount, options.storageContainer);
@@ -62,13 +63,13 @@ export class FunctionApp extends pulumi.ComponentResource {
             "WEBSITE_RUN_FROM_PACKAGE": runFromPackage,
             ...options.appSettings
         };
-        
+
         const app = new azure.appservice.FunctionApp(`${name}-fa`, {
             ...resourceGroupArgs,
-        
+
             appServicePlanId: appServicePlan.id,
-            storageConnectionString: options.storageAccount.primaryConnectionString,        
-            appSettings,        
+            storageConnectionString: options.storageAccount.primaryConnectionString,
+            appSettings,
             version: options.version
         });
 

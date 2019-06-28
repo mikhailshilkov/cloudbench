@@ -42,7 +42,7 @@ const createColdStarts = (prefix: string) => {
         version: "~2",
         runtime: "node"
     });
-    
+
     const externaljs = new FunctionApp(`${prefix}-externaljs`, {
         resourceGroup,
         storageAccount,
@@ -114,7 +114,7 @@ const createColdStarts = (prefix: string) => {
         //path: "http/v2/jsnoopproxies",
         version: "~2",
         runtime: "node"
-    });    
+    });
 
     const externalcs = new FunctionApp(`${prefix}-externalcs`, {
         resourceGroup,
@@ -154,6 +154,38 @@ const createColdStarts = (prefix: string) => {
         runtime: "dotnet"
     });
 
+    const jsbundle = new FunctionApp(`${prefix}-jsbundle`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        path: "http/v2/jsbundle",
+        version: "~2",
+        runtime: "node"
+    });
+
+    const premiumResourceGroup = new azure.core.ResourceGroup(`${name}-prem-rg`, {
+        location: "West Europe",
+    });
+
+    const premiumPlan = new azure.appservice.Plan("premium-asp", {
+        resourceGroupName: premiumResourceGroup.name,
+        sku: {
+            tier: "Premium",
+            size: "EP1",
+        },
+        maximumElasticWorkerCount: 20,
+    });
+
+    const premiumcs = new FunctionApp(`${prefix}-premiumcs`, {
+        resourceGroup: premiumResourceGroup,
+        storageAccount,
+        plan: premiumPlan,
+        storageContainer: runAsPackageContainer,
+        path: "http/v2/cspremium/bin/Debug/netcoreapp2.1/publish",
+        version: "~2",
+        runtime: "dotnet",
+    });
+
     const linuxResourceGroup = new azure.core.ResourceGroup('cb-linux-rg', {
         location: "West Europe",
     });
@@ -180,6 +212,8 @@ const createColdStarts = (prefix: string) => {
         java: java.url.apply(url => url + "http"),
         v1js: v1js.url.apply(url => url + "http"),
         v1cs: v1cs.url.apply(url => url + "http"),
+        premiumcs: premiumcs.url.apply(url => url + "http"),
+        jsbundle: jsbundle.url.apply(url => url + "http"),
         linuxResourceGroupName: linuxResourceGroup.name,
         linuxStorageAccountName: linuxStorageAccount.name
     };
