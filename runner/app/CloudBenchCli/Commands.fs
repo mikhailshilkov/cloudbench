@@ -17,6 +17,8 @@ type IWorkflowStarter =
 module Commands =
     open System
 
+    let from = DateTime(2019, 08, 27)
+
     let workflowStarter (schedulerUrl: string) =
         let http = new HttpClient ()
 
@@ -41,7 +43,7 @@ module Commands =
             let! blobs = storage.List (sprintf "ColdStart_%s_" cloud)
             let matchingBlobs = 
                 blobs 
-                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 04, 24)))
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset from)
                 |> List.filter (fun blob -> selector blob.Name)
             let! files = Async.Parallel (matchingBlobs |> List.map loadFile)
             let files = files |> List.ofArray
@@ -69,13 +71,40 @@ module Commands =
             //do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
         }
 
+        let coldStartIntervalHistory cloud maxInterval (selector: string -> bool) = async {
+            let! blobs = storage.List (sprintf "ColdStart_%s_" cloud)
+            let matchingBlobs = 
+                blobs 
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset from)
+                |> List.filter (fun blob -> selector blob.Name)
+                |> List.sortBy (fun _ ->  (new Random()).Next())
+                //|> List.take 20
+            let! files = Async.Parallel (matchingBlobs |> List.map loadFile)
+            let files = files |> List.ofArray
+
+            let responses = 
+                files 
+                |> List.map parseFile
+
+            let intervals = 
+                responses
+                |> List.map (List.filter (fun r -> r.Count > 0)) // remove failed requests
+                |> List.map coldStartIntervals
+                |> List.concat
+                |> List.sortBy (fun r -> r.Response.Time)
+                |> List.groupBy (fun r -> r.Response.Time.ToString("MMMM"))
+
+            let chart = probabilityHistoryChart maxInterval intervals
+            do storage.Save (sprintf "coldstart_%s_interval_history.json" cloud) chart
+        }
+
         let coldStartDuration cloud grouping (classifier: string -> LegendItem option) = async {
 
             let prefix = sprintf "ColdStart_%s" cloud
             let! blobs = storage.List prefix
             let relevant =
                 blobs
-                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 04, 24)))
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset from)
                 |> List.choose (fun blob ->
                     blob.Name.Replace (prefix, "")                    
                     |> classifier 
@@ -120,7 +149,7 @@ module Commands =
             let! blobs = storage.List prefix
             let relevant =
                 blobs
-                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset(DateTime(2019, 04, 29)))
+                |> List.filter (fun blob -> blob.Properties.Created.GetValueOrDefault() > DateTimeOffset from)
                 |> List.choose (fun blob ->
                     blob.Name.Replace (prefix, "")                    
                     |> classifier 
@@ -159,7 +188,10 @@ module Commands =
         }
 
         { new ICommands with 
-            member __.ColdStartInterval name maxInterval selector = coldStartInterval name maxInterval selector
+            member __.ColdStartInterval name maxInterval selector = async {
+                do! coldStartInterval name maxInterval selector
+                //do! coldStartIntervalHistory name maxInterval selector
+            }
             member __.ColdStartDuration cloud grouping classifier = coldStartDuration cloud grouping classifier
             member __.ExternalDuration cloud grouping classifier = externalDuration cloud grouping classifier
             member __.Trigger urls min max count = trigger urls min max count

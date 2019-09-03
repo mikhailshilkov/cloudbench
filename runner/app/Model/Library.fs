@@ -36,6 +36,20 @@ type ChartRoot = {
     color: obj
 }
 
+type LinesChartItem = {
+    name: string
+    items: obj list list
+}
+
+type LinesChartColor = {
+    color: string
+}
+
+type LinesChartRoot = {
+    points: LinesChartItem list
+    colors: LinesChartColor list
+}
+
 type LegendItem = {
     Name: string
     Label: string
@@ -44,15 +58,19 @@ type LegendItem = {
 }
 
 let serializePointsColor c xs = 
-    { points = xs; color = c }
+    { ChartRoot.points = xs; color = c }
     |> JsonConvert.SerializeObject
 
 let serializePoints xs = serializePointsColor null xs
 
+let serializeLinesColor colors xs = 
+    { LinesChartRoot.points = xs; colors = colors |> List.map (fun s -> {color = s}) }
+    |> JsonConvert.SerializeObject
+
 let percentile (xs: float list) (p: float) = 
     Statistics.Quantile(xs |> Seq.ofList, p / 100.)
 
-let probabilityChart maxInterval (items: ResponseAfterInterval list) =
+let probabilityChartRaw maxInterval (items: ResponseAfterInterval list) =
     let values =
         items 
         |> List.sortBy (fun x -> x.Interval)
@@ -75,6 +93,9 @@ let probabilityChart maxInterval (items: ResponseAfterInterval list) =
                     let count = values |> List.filter (fun x -> x < timespan) |> List.length
                     m, (float count / total)
                 )
+
+let probabilityChart maxInterval (items: ResponseAfterInterval list) =
+    probabilityChartRaw maxInterval items
     |> List.map (fun (t, v) -> [t :> obj; v :> obj])
     |> serializePoints
 
@@ -114,6 +135,23 @@ let probabilityChart2 maxInterval step (items: ResponseAfterInterval list) =
     |> List.append [(0., 0.)]
     |> List.map (fun (t, v) -> [t :> obj; v :> obj])
     |> serializePoints
+
+let probabilityHistoryChart (maxInterval: int) (months: (string * ResponseAfterInterval list) list) =    
+    let threshold (v: float) =
+        let a items =
+            let b =
+                items
+                |> List.filter (fun (_, y) -> y >= v)
+                |> List.map fst
+                |> List.tryHead
+                |> Option.defaultValue maxInterval
+            b
+        months
+        |> List.map (fun (month, xs) -> month, probabilityChartRaw maxInterval xs)
+        |> List.map (fun (m, xs) -> [m :> obj; a xs :> obj])
+    [(0.1, "90% survive"); (0.5, "50% survive"); (0.9, "10% survive")]
+    |> List.map (fun (t, s) -> { name = s; items = threshold t })
+    |> serializeLinesColor ["green";"yellow";"red"]
 
 let scatterChart max (items: ResponseAfterInterval list) =
     let color x =

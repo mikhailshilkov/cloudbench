@@ -34,15 +34,15 @@ let impl parts = async {
         match part with
 
         | ScheduleColdStarts ->
-            do! commands.Trigger (urls "Azure") 0 60 500
-            do! commands.Trigger (urls "AWS") 0 90 500
-            do! commands.Trigger (urls "GCP") 0 300 200
+            do! commands.Trigger (urls "Azure") 0 60 150
+            do! commands.Trigger (urls "AWS") 0 30 300
+            do! commands.Trigger (urls "GCP") 0 300 30
             //do! commands.Trigger (urls "External") 25 30 100
         
         | ColdStartIntervals ->
-            do! commands.ColdStartInterval "Azure" 30 (fun filename -> filename.Contains "Python" |> not)
-            do! commands.ColdStartInterval "AWS" 90 (fun _ -> true)
-            do! commands.ColdStartInterval "GCP" 300 (fun filename -> filename.Contains "JSXXXLDeps")
+            //do! commands.ColdStartInterval "Azure" 30 (fun filename -> filename.Contains "Python" || filename.Contains "Premium" |> not)
+            do! commands.ColdStartInterval "AWS" 30 (fun _ -> true)
+            //do! commands.ColdStartInterval "GCP" 300 (fun filename -> filename.Contains "JSXXXLDeps")
         
         | ColdStartDurations ->
             let languageWindows (name: string) =
@@ -171,26 +171,33 @@ let impl parts = async {
                 else
                     Some { Name = scenario; Label = "April 19-21"; Order = 2; Color = Some "#E9B000" }
 
-            do! commands.ColdStartDuration "Azure" "deploymentjs" (deployment "JS")
-            do! commands.ColdStartDuration "Azure" "deploymentcs" (deployment "CS")
+            let plan (name: string) =                
+                let scenario = (name.Split '_').[1]
+                match scenario with
+                | "CSNoop" -> Some { Name = "Consumption"; Label = "Consumption"; Order = 1; Color = Some "#E9B000" }
+                | "CSPremium" -> Some { Name = "Premium"; Label = "Premium"; Order = 2; Color = Some "#E24E42" }
+                | _ -> None
+            //do! commands.ColdStartDuration "Azure" "deploymentjs" (deployment "JS")
+            //do! commands.ColdStartDuration "Azure" "deploymentcs" (deployment "CS")
             do! commands.ColdStartDuration "Azure" "language" language
-            do! commands.ColdStartDuration "Azure" "languagewindows" languageWindows
-            do! commands.ColdStartDuration "Azure" "version" v1v2
-            do! commands.ColdStartDuration "Azure" "dependencies" dependencies
-            do! commands.ColdStartDuration "Azure" "appinsights" appinsights
-            do! commands.ColdStartDuration "AWS" "language" language
-            do! commands.ColdStartDuration "AWS" "memory" (memory "JSNoop")
-            do! commands.ColdStartDuration "AWS" "memoryxl" (memory "JSXL")
-            do! commands.ColdStartDuration "AWS" "memoryxxxl" (memory "JSXXXL")
-            do! commands.ColdStartDuration "AWS" "vpc" vpc
-            do! commands.ColdStartDuration "AWS" "dependencies" dependencies
-            do! commands.ColdStartDuration "GCP" "language" languageGcp
-            do! commands.ColdStartDuration "GCP" "memory" (memory "JSNoop")
-            do! commands.ColdStartDuration "GCP" "memoryxl" (memory "JSXL")
-            do! commands.ColdStartDuration "GCP" "memoryxxxl" (memory "JSXXXL")
-            do! commands.ColdStartDuration "GCP" "dependencies" dependencies
-            do! commands.ColdStartDuration "" "language" cloudLanguage
-            do! commands.ColdStartDuration "" "dependencies" dependencies
+            //do! commands.ColdStartDuration "Azure" "languagewindows" languageWindows
+            //do! commands.ColdStartDuration "Azure" "version" v1v2
+            //do! commands.ColdStartDuration "Azure" "dependencies" dependencies
+            //do! commands.ColdStartDuration "Azure" "appinsights" appinsights
+            //do! commands.ColdStartDuration "Azure" "plan" plan
+            //do! commands.ColdStartDuration "AWS" "language" language
+            //do! commands.ColdStartDuration "AWS" "memory" (memory "JSNoop")
+            //do! commands.ColdStartDuration "AWS" "memoryxl" (memory "JSXL")
+            //do! commands.ColdStartDuration "AWS" "memoryxxxl" (memory "JSXXXL")
+            //do! commands.ColdStartDuration "AWS" "vpc" vpc
+            //do! commands.ColdStartDuration "AWS" "dependencies" dependencies
+            //do! commands.ColdStartDuration "GCP" "language" languageGcp
+            //do! commands.ColdStartDuration "GCP" "memory" (memory "JSNoop")
+            //do! commands.ColdStartDuration "GCP" "memoryxl" (memory "JSXL")
+            //do! commands.ColdStartDuration "GCP" "memoryxxxl" (memory "JSXXXL")
+            //do! commands.ColdStartDuration "GCP" "dependencies" dependencies
+            //do! commands.ColdStartDuration "" "language" cloudLanguage
+            //do! commands.ColdStartDuration "" "dependencies" dependencies
             //do! commands.ExternalDuration "orders" "orders" orders
 }
 

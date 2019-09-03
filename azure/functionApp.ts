@@ -55,7 +55,6 @@ export class FunctionApp extends pulumi.ComponentResource {
 
         const appInsightsKey = options.appInsights ? options.appInsights.instrumentationKey : undefined;
         const appSettings = {
-            "FUNCTIONS_EXTENSION_VERSION": "~2",
             "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
             "ApplicationInsights:InstrumentationKey": appInsightsKey,
             "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,

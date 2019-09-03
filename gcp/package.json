@@ -1,8 +1,8 @@
 {
     "name": "@serverlessland/gcp",
     "dependencies": {
-        "@pulumi/gcp": "^0.16.6",
-        "@pulumi/pulumi": "^0.16.12"
+        "@pulumi/gcp": "latest",
+        "@pulumi/pulumi": "latest"
     },
     "devDependencies": {
         "@types/node": "^8.10.39",

@@ -1,0 +1,1 @@
+func azure functionapp publish cbazure-cold-ps-fa130cf30d

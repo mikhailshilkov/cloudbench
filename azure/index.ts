@@ -22,7 +22,6 @@ const storageAccount = new azure.storage.Account(`${name}sa`, {
 });
 
 const runAsPackageContainer = new azure.storage.Container(`${name}-c`, {
-    resourceGroupName: resourceGroup.name,
     storageAccountName: storageAccount.name,
     containerAccessType: "private",
 });
@@ -134,6 +133,15 @@ const createColdStarts = (prefix: string) => {
         runtime: "java"
     });
 
+    const powershell = new FunctionApp(`${prefix}-ps`, {
+        resourceGroup,
+        storageAccount,
+        storageContainer: runAsPackageContainer,
+        //path: "http/v2/psnoop",
+        version: "~2",
+        runtime: "powershell"
+    });
+
     const v1js = new FunctionApp(`${prefix}-v1js`, {
         resourceGroup,
         storageAccount,
@@ -169,8 +177,9 @@ const createColdStarts = (prefix: string) => {
 
     const premiumPlan = new azure.appservice.Plan("premium-asp", {
         resourceGroupName: premiumResourceGroup.name,
+        kind: "elastic",
         sku: {
-            tier: "Premium",
+            tier: "ElasticPremium",
             size: "EP1",
         },
         maximumElasticWorkerCount: 20,
@@ -198,6 +207,41 @@ const createColdStarts = (prefix: string) => {
         accountReplicationType: "LRS",
     });
 
+    const runAsPackageLinuxContainer = new azure.storage.Container(`${name}-cl`, {
+        storageAccountName: linuxStorageAccount.name,
+        containerAccessType: "private",
+    });
+
+    const linuxPlan = new azure.appservice.Plan(`${prefix}-asplinux`, {
+        resourceGroupName: linuxResourceGroup.name,
+        kind: "FunctionApp",
+        sku: {
+            tier: "Dynamic",
+            size: "Y1",
+        },
+        reserved: true,
+    });
+
+    const csLinux = new FunctionApp(`${prefix}-cslinux`, {
+        resourceGroup: linuxResourceGroup,
+        storageAccount: linuxStorageAccount,
+        storageContainer: runAsPackageLinuxContainer,
+        plan: linuxPlan,
+        //path: "http/v2/cslinux/bin/Debug/netcoreapp2.1",
+        version: "~2",
+        runtime: "dotnet",
+    });
+
+    const jsLinux = new FunctionApp(`${prefix}-jslinux`, {
+        resourceGroup: linuxResourceGroup,
+        storageAccount: linuxStorageAccount,
+        storageContainer: runAsPackageLinuxContainer,
+        plan: linuxPlan,
+        //path: "http/v2/jslinux",
+        version: "~2",
+        runtime: "node",
+    });
+
     return {
         nozipjs: nozipjs.url.apply(url => url + "http"),
         externaljs: externaljs.url.apply(url => url + "http"),
@@ -210,12 +254,15 @@ const createColdStarts = (prefix: string) => {
         appinsightscs: appinsightscs.url.apply(url => url + "http"),
         v2jsproxies: v2jsproxies.url.apply(url => url + "http"),
         java: java.url.apply(url => url + "http"),
+        powershell: powershell.url.apply(url => url + "http"),
         v1js: v1js.url.apply(url => url + "http"),
         v1cs: v1cs.url.apply(url => url + "http"),
         premiumcs: premiumcs.url.apply(url => url + "http"),
         jsbundle: jsbundle.url.apply(url => url + "http"),
         linuxResourceGroupName: linuxResourceGroup.name,
-        linuxStorageAccountName: linuxStorageAccount.name
+        linuxStorageAccountName: linuxStorageAccount.name,
+        cslinux: csLinux.url.apply(url => url + "http"),
+        jsLinux: jsLinux.url.apply(url => url + "http"),
     };
 }
 
