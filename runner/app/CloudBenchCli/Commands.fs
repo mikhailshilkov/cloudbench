@@ -17,7 +17,7 @@ type IWorkflowStarter =
 module Commands =
     open System
 
-    let from = DateTime(2019, 08, 27)
+    let from = DateTime(2019, 08, 21)
 
     let workflowStarter (schedulerUrl: string) =
         let http = new HttpClient ()
@@ -68,7 +68,7 @@ module Commands =
             let chart = scatterChart maxInterval intervals
             do storage.Save (sprintf "coldstart_%s_scatter.json" cloud) chart
 
-            //do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
+            do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
         }
 
         let coldStartIntervalHistory cloud maxInterval (selector: string -> bool) = async {

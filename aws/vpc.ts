@@ -163,7 +163,7 @@ export class SmartVpc extends ComponentResource implements VpcOutputs {
         // Private Hosted Zone
         if (inputs.zoneName) {
             const privateZone = new aws.route53.Zone(`${baseName}-private-hosted-zone`, {
-                vpcId: vpc.id,
+                vpcs:[{ vpcId: vpc.id }],
                 name: inputs.zoneName,
                 comment: `Private zone for ${inputs.zoneName}. Managed by Pulumi.`,
             }, vpcParent);
@@ -304,5 +304,5 @@ export class SmartVpc extends ComponentResource implements VpcOutputs {
 
         //     return privateRouteTable;
         // });
-    }    
+    }
 }

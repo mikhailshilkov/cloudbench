@@ -34,27 +34,39 @@ let impl parts = async {
         match part with
 
         | ScheduleColdStarts ->
-            do! commands.Trigger (urls "Azure") 0 60 150
-            do! commands.Trigger (urls "AWS") 0 30 300
-            do! commands.Trigger (urls "GCP") 0 300 30
+            //do! commands.Trigger (urls "Azure") 0 60 300
+            do! commands.Trigger (urls "AWS") 0 30 200
+            //do! commands.Trigger (urls "GCP") 0 300 60
             //do! commands.Trigger (urls "External") 25 30 100
         
         | ColdStartIntervals ->
-            //do! commands.ColdStartInterval "Azure" 30 (fun filename -> filename.Contains "Python" || filename.Contains "Premium" |> not)
-            do! commands.ColdStartInterval "AWS" 30 (fun _ -> true)
+            //do! commands.ColdStartInterval "Azure" 30 (fun filename -> (filename.Contains "Python" || filename.Contains "Premium" || filename.Contains "Linux") |> not)
+            do! commands.ColdStartInterval "Azure" 30 (fun filename -> (filename.Contains "Python" || filename.Contains "Linux"))
+            //do! commands.ColdStartInterval "AWS" 30 (fun _ -> true)
             //do! commands.ColdStartInterval "GCP" 300 (fun filename -> filename.Contains "JSXXXLDeps")
         
         | ColdStartDurations ->
             let languageWindows (name: string) =
                 if name.Contains "Deps" then None
                 elif name.Contains "V1" then None
+                elif name.Contains "Linux" then None
                 else 
                     let lang = (name.Split '_').[1].Replace("Noop", "")
                     match lang with
                     | "CS" -> Some { Name = "CSharp"; Label = "C#"; Order = 1; Color = Some "#178600" }
                     | "JS" -> Some { Name = "JS"; Label = "JavaScript"; Order = 2; Color = Some "#F1E05A" }
                     | "Java" -> Some { Name = "Java"; Label = "Java"; Order = 3; Color = Some "#B07219" }
+                    | "Ps" -> Some { Name = "Powershell"; Label = "Powershell"; Order = 5; Color = Some "#FF72A5" }
                     | _ -> None
+            let languageLinux (name: string) =
+                if name.Contains "Python" || name.Contains "Linux" then
+                    let lang = (name.Split '_').[1].Replace("Noop", "").Replace("Linux", "")
+                    match lang with
+                    | "CS" -> Some { Name = "CSharp"; Label = "C#"; Order = 1; Color = Some "#178600" }
+                    | "JS" -> Some { Name = "JS"; Label = "JavaScript"; Order = 2; Color = Some "#F1E05A" }
+                    | "Python" -> Some { Name = "Python"; Label = "Python"; Order = 3; Color = Some "#3572A5" }
+                    | _ -> None
+                else None
             let languageGcp (name: string) =
                 if name.Contains "Deps" then None
                 else 
@@ -69,6 +81,7 @@ let impl parts = async {
                 if name.Contains "VPC" then None
                 elif name.Contains "Deps" then None
                 elif name.Contains "V1" then None
+                elif name.Contains "Linux" then None
                 else 
                     let lang = (name.Split '_').[1].Replace("Noop", "")
                     match lang with
@@ -78,6 +91,7 @@ let impl parts = async {
                     | "Java" -> { Name = "Java"; Label = "Java"; Order = 4; Color = Some "#B07219" }
                     | "Ruby" -> { Name = "Ruby"; Label = "Ruby"; Order = 5; Color = Some "#701516" }
                     | "CS" -> { Name = "CSharp"; Label = "C#"; Order = 6; Color = Some "#178600" }
+                    | "Ps" -> { Name = "PowerShell"; Label = "PowerShell"; Order = 7; Color = Some "#012456" }
                     | v -> { Name = v; Label = "??" + v; Order = 10; Color = None }
                     |> Some 
             let cloudLanguage (name: string) =
@@ -102,6 +116,7 @@ let impl parts = async {
                 if name.Contains "Deps" then None
                 elif name.Contains "Python" then None
                 elif name.Contains "Java" then None
+                elif name.Contains "Linux" then None
                 else 
                     let lang = ((name.Split '_').[1].Replace("Noop", ""))
                     let version = if name.Contains "V1" then "V1" else "V2"
@@ -114,6 +129,7 @@ let impl parts = async {
             let dependencies (name: string) =
                 if name.Contains "VPC" then None
                 elif name.Contains "V1" then None
+                elif name.Contains "Linux" then None
                 else
                     let parts = name.Split '_'
                     let cloud = parts.[0]
@@ -156,6 +172,8 @@ let impl parts = async {
                 else None
             let deployment (language: string) (name: string) =
                 if name.Contains "V1" then None
+                else if name.Contains "Python" then None
+                else if name.Contains "Linux" then None
                 else
                     let scenario = (name.Split '_').[1].Replace(language, "")
                     match scenario with
@@ -177,14 +195,15 @@ let impl parts = async {
                 | "CSNoop" -> Some { Name = "Consumption"; Label = "Consumption"; Order = 1; Color = Some "#E9B000" }
                 | "CSPremium" -> Some { Name = "Premium"; Label = "Premium"; Order = 2; Color = Some "#E24E42" }
                 | _ -> None
-            //do! commands.ColdStartDuration "Azure" "deploymentjs" (deployment "JS")
-            //do! commands.ColdStartDuration "Azure" "deploymentcs" (deployment "CS")
+            do! commands.ColdStartDuration "Azure" "deploymentjs" (deployment "JS")
+            do! commands.ColdStartDuration "Azure" "deploymentcs" (deployment "CS")
             do! commands.ColdStartDuration "Azure" "language" language
-            //do! commands.ColdStartDuration "Azure" "languagewindows" languageWindows
-            //do! commands.ColdStartDuration "Azure" "version" v1v2
-            //do! commands.ColdStartDuration "Azure" "dependencies" dependencies
-            //do! commands.ColdStartDuration "Azure" "appinsights" appinsights
-            //do! commands.ColdStartDuration "Azure" "plan" plan
+            do! commands.ColdStartDuration "Azure" "languagewindows" languageWindows
+            do! commands.ColdStartDuration "Azure" "languagelinux" languageLinux
+            do! commands.ColdStartDuration "Azure" "version" v1v2
+            do! commands.ColdStartDuration "Azure" "dependencies" dependencies
+            do! commands.ColdStartDuration "Azure" "appinsights" appinsights
+            do! commands.ColdStartDuration "Azure" "plan" plan
             //do! commands.ColdStartDuration "AWS" "language" language
             //do! commands.ColdStartDuration "AWS" "memory" (memory "JSNoop")
             //do! commands.ColdStartDuration "AWS" "memoryxl" (memory "JSXL")

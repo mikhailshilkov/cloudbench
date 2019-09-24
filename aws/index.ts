@@ -1,5 +1,6 @@
 import { asset } from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
+import * as awsx from "@pulumi/awsx";
 import {SmartVpc} from './vpc';
 import { tilesUrl } from './maptiles';
 
@@ -55,25 +56,25 @@ function createColdStarts() {
     let experiments = [
         { name: 'js', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', path: 'jsnoop' },
         { name: 'python', runtime: aws.lambda.Python3d6Runtime, handler: 'handler.handler', path: 'pythonnoop' },
-        { name: 'cs', runtime: aws.lambda.DotnetCore2d1Runtime, handler: 'app::app.Functions::GetAsync', path: 'csnoop/bin/Debug/netcoreapp2.1/publish' },
-        { 
-            name: 'vpc', 
-            runtime: aws.lambda.NodeJS8d10Runtime, 
-            handler: 'index.handler', 
-            path: 'jsnoop', 
+        { name: 'cs', runtime: aws.lambda.DotnetCore2d1Runtime, handler: 'app::app.Functions::GetAsync', path: 'csnoop/bin/Release/netcoreapp2.1/publish' },
+        {
+            name: 'vpc',
+            runtime: aws.lambda.NodeJS8d10Runtime,
+            handler: 'index.handler',
+            path: 'jsnoop',
             environment: {
                 variables:  {
                     'CLOUDBENCH_ROLE': 'VPC'
                 }
-            }, 
+            },
             vpcConfig: {
                 securityGroupIds: [vpc.defaultSecurityGroupId],
                 subnetIds: vpc.privateSubnetIds
-            } 
+            }
         },
         { name: 'jsxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucketKey: bucketXlDeps.key },
         { name: 'jsxxxldeps', runtime: aws.lambda.NodeJS8d10Runtime, handler: 'index.handler', bucketKey: bucketXxxlDeps.key },
-        { name: 'java', runtime: aws.lambda.Java8Runtime, handler: 'example.Hello', 
+        { name: 'java', runtime: aws.lambda.Java8Runtime, handler: 'example.Hello',
         code: new asset.AssetArchive({
                 "lib/lambda-java-example-1.0-SNAPSHOT.jar": new asset.FileAsset("./http/javanoop/target/lambda-java-example-1.0-SNAPSHOT.jar"),
             })
@@ -83,7 +84,7 @@ function createColdStarts() {
     ];
 
     let lambdas =
-        experiments.map(exp => {        
+        experiments.map(exp => {
             return [128, 256, 512, 1024, 2048].map(memory => {
                 let name = memory == 128 ? `${exp.name}cold-lambda` : `${exp.name}cold-lambda-${memory}`;
 
@@ -92,7 +93,7 @@ function createColdStarts() {
                     code: exp.code || (exp.path ? new asset.AssetArchive({ ".": new asset.FileArchive(`./http/${exp.path}`) }) : undefined),
                     s3Bucket: exp.bucketKey ? lambdaBucket.bucket : undefined,
                     s3Key: exp.bucketKey,
-                    timeout: 5,
+                    timeout: 30,
                     handler: exp.handler,
                     role: role.arn,
                     memorySize: memory,
@@ -107,9 +108,9 @@ function createColdStarts() {
             })
         }).reduce((x,y) => x.concat(y), []);
 
-    const api = new aws.apigateway.x.API(`http-loadtest`, {
+    const api = new awsx.apigateway.API(`http-loadtest`, {
         routes: lambdas.map (i => {
-            return <aws.apigateway.x.Route>{ method: "GET", path: i.path, eventHandler: i.lambda };
+            return <awsx.apigateway.Route>{ method: "GET", path: i.path, eventHandler: i.lambda };
         })
     });
 
@@ -133,12 +134,12 @@ function createMapTiles() {
         }
     }, { dependsOn: [fullAccessLambda] });
 
-    const api = new aws.apigateway.x.API(`http-maptiles`, {
+    const api = new awsx.apigateway.API(`http-maptiles`, {
         routes: [{ method: "GET", path: '/{route+}', eventHandler: lambda }]
-    });    
+    });
 
     return api.url;
 }
 export const coldStartEndpoint = createColdStarts();
-export const mapTileEndpoint = createMapTiles();
+//export const mapTileEndpoint = createMapTiles();
 //export const mapTiles = tilesUrl;
