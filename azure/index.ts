@@ -6,6 +6,9 @@ const name = pulumi.getStack();
 
 const resourceGroup = new azure.core.ResourceGroup(`${name}-rg`, {
     location: "West Europe",
+    tags: {
+        Owner: "mikhailshilkov"
+    },
 });
 
 const resourceGroupArgs = {
@@ -28,7 +31,7 @@ const runAsPackageContainer = new azure.storage.Container(`${name}-c`, {
 
 const appInsights = new azure.appinsights.Insights(`${name}-ai`, {
     resourceGroupName: resourceGroup.name,
-    applicationType: 'Web',
+    applicationType: "web",
     location: "West Europe"
 });
 
@@ -38,7 +41,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         path: "nozip",
-        version: "~2",
+        version: "~3",
         runtime: "node"
     });
 
@@ -47,7 +50,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         path: "http/v2/jsnoopzip",
-        version: "~2",
+        version: "~3",
         runtime: "node"
     });
 
@@ -56,7 +59,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsnoop",
-        version: "~2",
+        version: "~3",
         runtime: "node"
     });
 
@@ -65,7 +68,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsxldeps",
-        version: "~2",
+        version: "~3",
         runtime: "node"
     });
 
@@ -74,7 +77,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsxxxldeps",
-        version: "~2",
+        version: "~3",
         runtime: "node"
     });
 
@@ -83,7 +86,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/csnoop/bin/Debug/netcoreapp2.1",
-        version: "~2",
+        version: "~3",
         runtime: "dotnet"
     });
 
@@ -93,7 +96,7 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageContainer,
         appInsights,
         //path: "http/v2/csnoop/bin/Debug/netcoreapp2.1",
-        version: "~2",
+        version: "~3",
         runtime: "dotnet"
     });
 
@@ -102,7 +105,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         path: "nozip",
-        version: "~2",
+        version: "~3",
         runtime: "dotnet"
     });
 
@@ -111,7 +114,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsnoopproxies",
-        version: "~2",
+        version: "~3",
         runtime: "node"
     });
 
@@ -119,8 +122,8 @@ const createColdStarts = (prefix: string) => {
         resourceGroup,
         storageAccount,
         storageContainer: runAsPackageContainer,
-        path: "http/v2/csnoopzip/bin/Debug/netcoreapp2.1/publish",
-        version: "~2",
+        path: "http/v2/csnoopzip/bin/Debug/netcoreapp3.1/publish",
+        version: "~3",
         runtime: "dotnet"
     });
 
@@ -129,7 +132,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/javanoop/target/azure-functions/v2java",
-        version: "~2",
+        version: "~3",
         runtime: "java"
     });
 
@@ -138,28 +141,8 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/psnoop",
-        version: "~2",
+        version: "~3",
         runtime: "powershell"
-    });
-
-    const v1js = new FunctionApp(`${prefix}-v1js`, {
-        resourceGroup,
-        storageAccount,
-        storageContainer: runAsPackageContainer,
-        //path: "http/v1/jsnoop",
-        path: "nozip",
-        version: "~1",
-        runtime: "node"
-    });
-
-    const v1cs = new FunctionApp(`${prefix}-v1cs`, {
-        resourceGroup,
-        storageAccount,
-        storageContainer: runAsPackageContainer,
-        //path: "http/v1/csnoop/bin/Debug/net461",
-        path: "nozip",
-        version: "~1",
-        runtime: "dotnet"
     });
 
     const jsbundle = new FunctionApp(`${prefix}-jsbundle`, {
@@ -167,7 +150,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         path: "http/v2/jsbundle",
-        version: "~2",
+        version: "~3",
         runtime: "node"
     });
 
@@ -190,8 +173,8 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         plan: premiumPlan,
         storageContainer: runAsPackageContainer,
-        path: "http/v2/cspremium/bin/Debug/netcoreapp2.1/publish",
-        version: "~2",
+        path: "http/v2/cspremium/bin/Debug/netcoreapp3.1/publish",
+        version: "~3",
         runtime: "dotnet",
     });
 
@@ -228,7 +211,7 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageLinuxContainer,
         plan: linuxPlan,
         //path: "http/v2/cslinux/bin/Debug/netcoreapp2.1",
-        version: "~2",
+        version: "~3",
         runtime: "dotnet",
     });
 
@@ -238,7 +221,7 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageLinuxContainer,
         plan: linuxPlan,
         //path: "http/v2/jslinux",
-        version: "~2",
+        version: "~3",
         runtime: "node",
     });
 
@@ -255,8 +238,6 @@ const createColdStarts = (prefix: string) => {
         v2jsproxies: v2jsproxies.url.apply(url => url + "http"),
         java: java.url.apply(url => url + "http"),
         powershell: powershell.url.apply(url => url + "http"),
-        v1js: v1js.url.apply(url => url + "http"),
-        v1cs: v1cs.url.apply(url => url + "http"),
         premiumcs: premiumcs.url.apply(url => url + "http"),
         jsbundle: jsbundle.url.apply(url => url + "http"),
         linuxResourceGroupName: linuxResourceGroup.name,
@@ -266,17 +247,4 @@ const createColdStarts = (prefix: string) => {
     };
 }
 
-const createTiles = (prefix: string) => {
-    let app = new FunctionApp(`${prefix}-b`, {
-        resourceGroup,
-        storageAccount,
-        storageContainer: runAsPackageContainer,
-        version: "~2",
-        runtime: "node"
-    });
-
-    return app.url.apply(url => url + "{z}/{x}/{y}.png");
-}
-
 export const coldStarts = createColdStarts(`${name}-cold`);
-export const tiles = createTiles(`${name}-maptile`);

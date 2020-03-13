@@ -3,6 +3,9 @@ import * as gcp from "@pulumi/gcp";
 
 const bucket = new gcp.storage.Bucket("cloudbench-bucket", {
     location: 'europe-west1',
+    labels: {
+        "owner": "mikhailshilkov",
+    },
 });
 
 // Cold Start JS function
@@ -41,11 +44,11 @@ const bucketObjectGo = new gcp.storage.BucketObject("cloudbench-go-bucket-object
 });
 
 let functions = [
-    { name: 'coldstartjs', blob: bucketObjectJsNoOp },
-    { name: 'coldjsxldeps', blob: bucketObjectXlDeps },
-    { name: 'coldjsxxxldeps', blob: bucketObjectXxxlDeps },
+    { name: 'coldstartjs', blob: bucketObjectJsNoOp, runtime: "nodejs8" },
+    { name: 'coldjsxldeps', blob: bucketObjectXlDeps, runtime: "nodejs8" },
+    { name: 'coldjsxxxldeps', blob: bucketObjectXxxlDeps, runtime: "nodejs8" },
     { name: 'coldstartpython', blob: bucketObjectPython, runtime: "python37" },
-    { name: 'coldstartgo', blob: bucketObjectGo, runtime: "go111", handler: "Handler" },
+    { name: 'coldstartgo', blob: bucketObjectGo, runtime: "go113", handler: "Handler" },
 ];
 
 let coldStartFuncs = 
@@ -61,35 +64,13 @@ functions.map(f => {
                 sourceArchiveObject: f.blob.name,
                 entryPoint: f.handler || "handler",
                 triggerHttp: true,
-                availableMemoryMb: memory
+                availableMemoryMb: memory,
+                labels: {
+                    "owner": "mikhailshilkov",
+                },            
             });
         });
     }).reduce((x,y) => x.concat(y), []);
 
 
 export const coldStartJsUrl = coldStartFuncs.map(f => f.httpsTriggerUrl);
-
-const bucketObjectJsMapTiles = new gcp.storage.BucketObject("cloudbench-jsmaptile-bucket-object", {
-    bucket: bucket.name,
-    source: new asset.AssetArchive({
-        ".": new asset.FileArchive("./http/jsmaptilescolored"),
-    }),
-});
-
-const tilesBucket = new gcp.storage.Bucket("cloudbench-tiles-bucketeu", {
-    location: 'europe-west1'
-});
-
-const tileEuFunction = new gcp.cloudfunctions.Function("maptileseu", {
-    sourceArchiveBucket: bucket.name,
-    sourceArchiveObject: bucketObjectJsMapTiles.name,
-    entryPoint: "handler",
-    triggerHttp: true,
-    availableMemoryMb: 2048,
-    region: 'europe-west1',
-    environmentVariables: {
-        'STORAGE_BUCKET': tilesBucket.name
-    }
-});
-
-export const tileEuFunctionUrl = tileEuFunction.httpsTriggerUrl;

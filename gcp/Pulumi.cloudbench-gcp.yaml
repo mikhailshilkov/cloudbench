@@ -1,3 +1,0 @@
-config:
-  gcp:region: us-central1
-  gcp:project: cloudbench-221016

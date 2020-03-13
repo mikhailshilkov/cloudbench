@@ -1,6 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as azure from "@pulumi/azure";
-import { signedBlobReadUrl } from "./util";
 
 
 export interface FunctionAppOptions {
@@ -11,7 +10,9 @@ export interface FunctionAppOptions {
     readonly path?: string;
     readonly version: string;
     readonly runtime: string;
-    readonly appSettings?: object;
+    readonly appSettings?: {
+        [key: string]: pulumi.Input<string>;
+    };
     readonly plan?: azure.appservice.Plan;
 }
 
@@ -38,25 +39,23 @@ export class FunctionApp extends pulumi.ComponentResource {
             },
         });
 
-        let runFromPackage: pulumi.Input<string | undefined> = "1";
+        let runFromPackage: pulumi.Input<string> = "1";
         if (options.path === "nozip") {
-            runFromPackage = undefined;
+            runFromPackage = "";
         } else if (options.path) {
-            const blob = new azure.storage.ZipBlob(`${name}-b`, {
-                resourceGroupName: options.storageAccount.resourceGroupName,
+            const blob = new azure.storage.Blob(`${name}-b`, {
                 storageAccountName: options.storageAccount.name,
                 storageContainerName: options.storageContainer.name,
-                type: "block",
+                type: "Block",
 
-                content: new pulumi.asset.FileArchive(options.path)
+                source: new pulumi.asset.FileArchive(options.path)
             });
-            runFromPackage = signedBlobReadUrl(blob, options.storageAccount, options.storageContainer);
+            runFromPackage = azure.storage.signedBlobReadUrl(blob, options.storageAccount);
         }
 
-        const appInsightsKey = options.appInsights ? options.appInsights.instrumentationKey : undefined;
+        const appInsightsKey = options.appInsights ? options.appInsights.instrumentationKey : "";
         const appSettings = {
             "WEBSITE_NODE_DEFAULT_VERSION": "8.11.1",
-            "ApplicationInsights:InstrumentationKey": appInsightsKey,
             "APPINSIGHTS_INSTRUMENTATIONKEY": appInsightsKey,
             "FUNCTIONS_WORKER_RUNTIME": options.runtime,
             "WEBSITE_RUN_FROM_PACKAGE": runFromPackage,

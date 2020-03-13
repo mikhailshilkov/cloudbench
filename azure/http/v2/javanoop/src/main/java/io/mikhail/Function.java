@@ -4,6 +4,9 @@ import java.util.*;
 import com.microsoft.azure.functions.annotation.*;
 import com.microsoft.azure.functions.*;
 
+/**
+ * Azure Functions with HTTP Trigger.
+ */
 public class Function {
     private String instance = null;
     private static Integer count = 0;
