@@ -41,7 +41,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         path: "nozip",
-        version: "~3",
+        version: "~2",
         runtime: "node"
     });
 
@@ -50,7 +50,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         path: "http/v2/jsnoopzip",
-        version: "~3",
+        version: "~2",
         runtime: "node"
     });
 
@@ -59,7 +59,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsnoop",
-        version: "~3",
+        version: "~2",
         runtime: "node"
     });
 
@@ -68,7 +68,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsxldeps",
-        version: "~3",
+        version: "~2",
         runtime: "node"
     });
 
@@ -77,7 +77,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsxxxldeps",
-        version: "~3",
+        version: "~2",
         runtime: "node"
     });
 
@@ -114,7 +114,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/jsnoopproxies",
-        version: "~3",
+        version: "~2",
         runtime: "node"
     });
 
@@ -132,7 +132,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/javanoop/target/azure-functions/v2java",
-        version: "~3",
+        version: "~2",
         runtime: "java"
     });
 
@@ -141,7 +141,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         //path: "http/v2/psnoop",
-        version: "~3",
+        version: "~2",
         runtime: "powershell"
     });
 
@@ -150,7 +150,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount,
         storageContainer: runAsPackageContainer,
         path: "http/v2/jsbundle",
-        version: "~3",
+        version: "~2",
         runtime: "node"
     });
 
@@ -210,6 +210,7 @@ const createColdStarts = (prefix: string) => {
         storageAccount: linuxStorageAccount,
         storageContainer: runAsPackageLinuxContainer,
         plan: linuxPlan,
+        osType: "linux",
         //path: "http/v2/cslinux/bin/Debug/netcoreapp2.1",
         version: "~3",
         runtime: "dotnet",
@@ -220,9 +221,21 @@ const createColdStarts = (prefix: string) => {
         storageAccount: linuxStorageAccount,
         storageContainer: runAsPackageLinuxContainer,
         plan: linuxPlan,
+        osType: "linux",
         //path: "http/v2/jslinux",
         version: "~3",
         runtime: "node",
+    });
+
+    const python = new FunctionApp(`${prefix}-python`, {
+        resourceGroup: linuxResourceGroup,
+        storageAccount: linuxStorageAccount,
+        storageContainer: runAsPackageLinuxContainer,
+        plan: linuxPlan,
+        osType: "linux",
+        //path: "http/v2/python",
+        version: "~3",
+        runtime: "python",
     });
 
     return {
@@ -244,7 +257,8 @@ const createColdStarts = (prefix: string) => {
         linuxStorageAccountName: linuxStorageAccount.name,
         cslinux: csLinux.url.apply(url => url + "http"),
         jsLinux: jsLinux.url.apply(url => url + "http"),
+        python: python.url.apply(url => url + "http"),
     };
 }
 
-export const coldStarts = createColdStarts(`${name}-cold`);
+export const coldStarts = pulumi.output(createColdStarts(`${name}-cold`)).apply(v => JSON.stringify(v, undefined, 2));

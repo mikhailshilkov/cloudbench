@@ -15,7 +15,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <azure.functions.maven.plugin.version>1.4.1</azure.functions.maven.plugin.version>
         <azure.functions.java.library.version>1.3.1</azure.functions.java.library.version>
-        <functionAppName>v3java-20200313103413237</functionAppName>
+        <functionAppName>dev-cold-java-fab1fa8615</functionAppName>
         <stagingDirectory>${project.build.directory}/azure-functions/${functionAppName}</stagingDirectory>
     </properties>
 

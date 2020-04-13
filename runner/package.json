@@ -1,5 +1,5 @@
 {
-    "name": "@serverlessland/azure",
+    "name": "@serverlessland/runner",
     "dependencies": {
         "@pulumi/azure": "latest",
         "@pulumi/pulumi": "latest",

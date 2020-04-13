@@ -34,9 +34,9 @@ let impl parts = async {
         match part with
 
         | ScheduleColdStarts ->
-            //do! commands.Trigger (urls "Azure") 0 60 300
-            do! commands.Trigger (urls "AWS") 0 30 200
-            //do! commands.Trigger (urls "GCP") 0 300 60
+            do! commands.Trigger (urls "Azure") 0 60 30
+            do! commands.Trigger (urls "AWS") 0 30 20
+            do! commands.Trigger (urls "GCP") 0 300 6
             //do! commands.Trigger (urls "External") 25 30 100
         
         | ColdStartIntervals ->

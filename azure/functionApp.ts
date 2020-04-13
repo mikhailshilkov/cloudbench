@@ -8,6 +8,7 @@ export interface FunctionAppOptions {
     readonly storageContainer: azure.storage.Container;
     readonly appInsights?: azure.appinsights.Insights;
     readonly path?: string;
+    readonly osType?: string;
     readonly version: string;
     readonly runtime: string;
     readonly appSettings?: {
@@ -68,7 +69,8 @@ export class FunctionApp extends pulumi.ComponentResource {
             appServicePlanId: appServicePlan.id,
             storageConnectionString: options.storageAccount.primaryConnectionString,
             appSettings,
-            version: options.version
+            osType: options.osType,
+            version: options.version,
         });
 
         this.url = app.defaultHostname.apply(h => {

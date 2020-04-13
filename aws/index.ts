@@ -1,4 +1,4 @@
-import { asset } from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 import {SmartVpc} from './vpc';
@@ -48,15 +48,15 @@ function createColdStarts() {
     });
     let bucketXlDeps = new aws.s3.BucketObject("lambda-xldeps", {
         bucket: lambdaBucket,
-        source: new asset.FileAsset("./http/jsxldeps.zip")
+        source: new pulumi.asset.FileAsset("./http/jsxldeps.zip")
     });
     let bucketXxxlDeps = new aws.s3.BucketObject("lambda-xxxldeps", {
         bucket: lambdaBucket,
-        source: new asset.FileAsset("./http/jsxxxldeps.zip")
+        source: new pulumi.asset.FileAsset("./http/jsxxxldeps.zip")
     });
     let bucketGo = new aws.s3.BucketObject("lambda-go", {
         bucket: lambdaBucket,
-        source: new asset.FileAsset("./http/gonoop/main.zip")
+        source: new pulumi.asset.FileAsset("./http/gonoop/main.zip")
     });
 
     let experiments = [
@@ -81,8 +81,8 @@ function createColdStarts() {
         { name: 'jsxldeps', runtime: aws.lambda.NodeJS12dXRuntime, handler: 'index.handler', bucketKey: bucketXlDeps.key },
         { name: 'jsxxxldeps', runtime: aws.lambda.NodeJS12dXRuntime, handler: 'index.handler', bucketKey: bucketXxxlDeps.key },
         { name: 'java', runtime: aws.lambda.Java11Runtime, handler: 'example.Hello',
-        code: new asset.AssetArchive({
-                "lib/lambda-java-example-1.0-SNAPSHOT.jar": new asset.FileAsset("./http/javanoop/target/lambda-java-example-1.0-SNAPSHOT.jar"),
+        code: new pulumi.asset.AssetArchive({
+                "lib/lambda-java-example-1.0-SNAPSHOT.jar": new pulumi.asset.FileAsset("./http/javanoop/target/lambda-java-example-1.0-SNAPSHOT.jar"),
             })
         },
         { name: 'ruby', runtime: aws.lambda.Ruby2d7Runtime, handler: 'lambda_function.lambda_handler', path: 'rubynoop' },
@@ -96,7 +96,7 @@ function createColdStarts() {
 
                 let lambda = new aws.lambda.Function(name, {
                     runtime: exp.runtime,
-                    code: exp.code || (exp.path ? new asset.AssetArchive({ ".": new asset.FileArchive(`./http/${exp.path}`) }) : undefined),
+                    code: exp.code || (exp.path ? new pulumi.asset.AssetArchive({ ".": new pulumi.asset.FileArchive(`./http/${exp.path}`) }) : undefined),
                     s3Bucket: exp.bucketKey ? lambdaBucket.bucket : undefined,
                     s3Key: exp.bucketKey,
                     timeout: 30,
@@ -111,15 +111,16 @@ function createColdStarts() {
                 }, { dependsOn: exp.vpcConfig ? [fullAccessLambda, vpcAccessLambda] : [fullAccessLambda] });
 
                 return {
+                    code: `${exp.name}${memory}`,
                     lambda,
-                    path: `/${exp.name}cold${memory}`
+                    path: `${exp.name}cold${memory}`
                 };
             })
         }).reduce((x,y) => x.concat(y), []);
 
     const api = new awsx.apigateway.API(`http-loadtest`, {
         routes: lambdas.map (i => {
-            return <awsx.apigateway.Route>{ method: "GET", path: i.path, eventHandler: i.lambda };
+            return <awsx.apigateway.Route>{ method: "GET", path: "/" + i.path, eventHandler: i.lambda };
         }),
         stageArgs: {
             tags: {
@@ -128,7 +129,9 @@ function createColdStarts() {
         },
     });
 
-    return api.url;
+    type A = [string, pulumi.Output<string>];
+    const items = lambdas.map(l => <A>[l.code, pulumi.interpolate`${api.url}${l.path}`]);
+    return Object.assign.apply(null, items.map(([key, val]) => { return { [key]: val } }))
 }
 
-export const coldStartEndpoint = createColdStarts();
+export const coldStartEndpoint = pulumi.output(createColdStarts()).apply(v => JSON.stringify(v, undefined, 2));
