@@ -211,7 +211,7 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageLinuxContainer,
         plan: linuxPlan,
         osType: "linux",
-        //path: "http/v2/cslinux/bin/Debug/netcoreapp2.1",
+        path: "http/v2/cslinux/bin/Debug/netcoreapp3.1",
         version: "~3",
         runtime: "dotnet",
     });
@@ -222,8 +222,8 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageLinuxContainer,
         plan: linuxPlan,
         osType: "linux",
-        //path: "http/v2/jslinux",
-        version: "~3",
+        path: "http/v2/jslinux",
+        version: "~2",
         runtime: "node",
     });
 
@@ -233,8 +233,8 @@ const createColdStarts = (prefix: string) => {
         storageContainer: runAsPackageLinuxContainer,
         plan: linuxPlan,
         osType: "linux",
-        //path: "http/v2/python",
-        version: "~3",
+        path: "http/v2/pythonnoop",
+        version: "~2",
         runtime: "python",
     });
 

@@ -29,7 +29,6 @@ let scenario =
 
 let ping =     
     let impl (url: string) = async {
-        let! _ = http.GetAsync "http://35.204.93.82/ping" |> Async.AwaitTask
         let stopwatch = Stopwatch.StartNew ()
         try
             let! response = http.GetAsync url |> Async.AwaitTask

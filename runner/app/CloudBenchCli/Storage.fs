@@ -32,7 +32,7 @@ module Storage =
         let save (filename: string) content =
             outputDirectories
             |> List.iter (fun outputDirectory ->
-                let fullName = sprintf "%s\%s" outputDirectory (filename.ToLowerInvariant ())
+                let fullName = Path.Combine(outputDirectory, filename.ToLowerInvariant ())
                 File.WriteAllText (fullName.ToLowerInvariant (), content)
             )
 
@@ -41,7 +41,7 @@ module Storage =
 
         let zip (filename: string) (files: List<string * string>) =
             let outputDirectory = outputDirectories |> List.last
-            let fullName = sprintf "%s\%s" outputDirectory (filename.ToLowerInvariant ())
+            let fullName = Path.Combine(outputDirectory, filename.ToLowerInvariant ())
             use zipToOpen = new FileStream (fullName, FileMode.Create)
             use archive = new ZipArchive (zipToOpen, ZipArchiveMode.Update)
             files

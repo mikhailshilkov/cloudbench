@@ -16,13 +16,17 @@ const storageAccount = new azure.storage.Account("cbrunnersa", {
     accountKind: "StorageV2",
     accountTier: "Standard",
     accountReplicationType: "LRS",
+    enableHttpsTrafficOnly: false,
 });
 
 const app = new FunctionApp("cbrunnerapp", {
     resourceGroup,
     storageAccount,
     version: "~2",
-    runtime: "dotnet"
+    runtime: "dotnet",
+    appSettings: {
+        WEBSITE_RUN_FROM_PACKAGE: "1",
+    }
 });
 
 

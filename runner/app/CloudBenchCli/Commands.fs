@@ -1,5 +1,6 @@
 ﻿namespace CloudBenchCli
 
+open System.IO
 open System.Net.Http
 open Newtonsoft.Json
 open CloudBench.Model
@@ -17,7 +18,7 @@ type IWorkflowStarter =
 module Commands =
     open System
 
-    let from = DateTime(2019, 08, 21)
+    let from = DateTime(2020, 04, 16)
 
     let workflowStarter (schedulerUrl: string) =
         let http = new HttpClient ()
@@ -127,7 +128,7 @@ module Commands =
 
                     if cloud <> "" then
                         let durations = coldStartDurations group.Color responses
-                        storage.Save (sprintf "raw\\coldstart_%s_%s.json" cloud group.Name) durations
+                        storage.Save (Path.Combine("raw", sprintf "coldstart_%s_%s.json" cloud group.Name)) durations
 
                     //do storage.Zip (sprintf "ColdStart_%s_%s.zip" cloud group.Name) files
 

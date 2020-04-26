@@ -1,1 +1,1 @@
-func azure functionapp publish cbazure-cold-jslinux-fab3b90551 --nozip
+func azure functionapp publish dev-cold-jslinux-faa9de395f

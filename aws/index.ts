@@ -118,10 +118,17 @@ function createColdStarts() {
             })
         }).reduce((x,y) => x.concat(y), []);
 
+    aws.apigateway.RestApi
+
     const api = new awsx.apigateway.API(`http-loadtest`, {
         routes: lambdas.map (i => {
             return <awsx.apigateway.Route>{ method: "GET", path: "/" + i.path, eventHandler: i.lambda };
         }),
+        restApiArgs: <any>{
+            tags: {
+                Owner: "mikhailshilkov",
+            },
+        },
         stageArgs: {
             tags: {
                 Owner: "mikhailshilkov",
