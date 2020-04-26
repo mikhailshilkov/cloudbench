@@ -120,7 +120,8 @@ module Commands =
                     let responses = 
                         files 
                         |> List.map parseFile
-                        |> List.map (List.filter (fun r -> r.Count > 0)) // remove failed requests
+                        |> List.map (List.filter (fun r -> r.Count > 0)) // remove failed requests                     
+                        |> List.filter (fun xs -> List.length xs > 0)
                         |> List.map (List.skip 1)
                         |> List.concat
 
