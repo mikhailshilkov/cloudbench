@@ -1,10 +1,10 @@
 const fs = require("fs");
-var buf = fs.readFileSync("/proc/self/cgroup", "utf8").toString();
-buf = buf.split("\n");
-buf = buf[buf.length - 3];
-buf = buf.split("/");
+var cgroup = fs.readFileSync("/proc/self/cgroup", "utf8").toString();
+var bufs = cgroup.split("\n");
+var buf = bufs.filter(v => v.indexOf("/sandbox-root-") >= 0)[0];
+buf = buf.split("/")[1];
 
-const instance = `AWS:${buf[1].substring(13)}`;
+const instance = `AWS:${buf.substring(13)}`;
 const memory = process.env.AWS_LAMBDA_FUNCTION_MEMORY_SIZE;
 const role = process.env.CLOUDBENCH_ROLE || '';
 let count = 0;

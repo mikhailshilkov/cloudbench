@@ -69,7 +69,7 @@ module Commands =
             let chart = scatterChart maxInterval intervals
             do storage.Save (sprintf "coldstart_%s_scatter.json" cloud) chart
 
-            do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
+            //do storage.Zip (sprintf "ColdStart_%s.zip" cloud) files
         }
 
         let coldStartIntervalHistory cloud maxInterval (selector: string -> bool) = async {
