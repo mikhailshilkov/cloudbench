@@ -70,37 +70,37 @@ function createColdStarts() {
         { name: 'js', runtime: aws.lambda.NodeJS12dXRuntime, handler: 'index.handler', path: 'jsnoop', bucketKey: undefined, code: undefined, vpcConfig: undefined, environment: undefined },
         { name: 'docker', packageType: "Image", imageUri: imageNoop.imageValue },
         { name: 'docker100', packageType: "Image", imageUri: image100mb.imageValue },
-        // { name: 'python', runtime: aws.lambda.Python3d8Runtime, handler: 'handler.handler', path: 'pythonnoop' },
-        // { name: 'cs', runtime: aws.lambda.DotnetCore2d1Runtime, handler: 'app::app.Functions::GetAsync', path: 'csnoop/bin/Release/netcoreapp2.1/publish' },
-        // {
-        //     name: 'vpc',
-        //     runtime: aws.lambda.NodeJS12dXRuntime,
-        //     handler: 'index.handler',
-        //     path: 'jsnoop',
-        //     environment: {
-        //         variables:  {
-        //             'CLOUDBENCH_ROLE': 'VPC'
-        //         }
-        //     },
-        //     vpcConfig: {
-        //         securityGroupIds: [vpc.defaultSecurityGroupId],
-        //         subnetIds: vpc.privateSubnetIds
-        //     }
-        // },
-        // { name: 'jsxldeps', runtime: aws.lambda.NodeJS12dXRuntime, handler: 'index.handler', bucketKey: bucketXlDeps.key },
-        // { name: 'jsxxxldeps', runtime: aws.lambda.NodeJS12dXRuntime, handler: 'index.handler', bucketKey: bucketXxxlDeps.key },
-        // { name: 'java', runtime: aws.lambda.Java11Runtime, handler: 'example.Hello',
-        // code: new pulumi.asset.AssetArchive({
-        //         "lib/lambda-java-example-1.0-SNAPSHOT.jar": new pulumi.asset.FileAsset("./http/javanoop/target/lambda-java-example-1.0-SNAPSHOT.jar"),
-        //     })
-        // },
-        // { name: 'ruby', runtime: aws.lambda.Ruby2d7Runtime, handler: 'lambda_function.lambda_handler', path: 'rubynoop' },
-        // { name: 'go', runtime: aws.lambda.Go1dxRuntime, handler: 'main', bucketKey: bucketGo.key },
+        { name: 'python', runtime: aws.lambda.Python3d8Runtime, handler: 'handler.handler', path: 'pythonnoop' },
+        { name: 'cs', runtime: aws.lambda.DotnetCore2d1Runtime, handler: 'app::app.Functions::GetAsync', path: 'csnoop/bin/Release/netcoreapp2.1/publish' },
+        {
+            name: 'vpc',
+            runtime: aws.lambda.NodeJS12dXRuntime,
+            handler: 'index.handler',
+            path: 'jsnoop',
+            environment: {
+                variables:  {
+                    'CLOUDBENCH_ROLE': 'VPC'
+                }
+            },
+            vpcConfig: {
+                securityGroupIds: [vpc.defaultSecurityGroupId],
+                subnetIds: vpc.privateSubnetIds
+            }
+        },
+        { name: 'jsxldeps', runtime: aws.lambda.NodeJS12dXRuntime, handler: 'index.handler', bucketKey: bucketXlDeps.key },
+        { name: 'jsxxxldeps', runtime: aws.lambda.NodeJS12dXRuntime, handler: 'index.handler', bucketKey: bucketXxxlDeps.key },
+        { name: 'java', runtime: aws.lambda.Java11Runtime, handler: 'example.Hello',
+        code: new pulumi.asset.AssetArchive({
+                "lib/lambda-java-example-1.0-SNAPSHOT.jar": new pulumi.asset.FileAsset("./http/javanoop/target/lambda-java-example-1.0-SNAPSHOT.jar"),
+            })
+        },
+        { name: 'ruby', runtime: aws.lambda.Ruby2d7Runtime, handler: 'lambda_function.lambda_handler', path: 'rubynoop' },
+        { name: 'go', runtime: aws.lambda.Go1dxRuntime, handler: 'main', bucketKey: bucketGo.key },
     ];
 
     let lambdas =
         experiments.map(exp => {
-        return [128/*, 256, 512, 1024, 2048*/].map(memory => {
+        return [128, 256, 512, 1024, 2048, 4096, 8192].map(memory => {
                 let name = memory == 128 ? `${exp.name}cold-lambda` : `${exp.name}cold-lambda-${memory}`;
 
                 let lambda = new aws.lambda.Function(name, {
@@ -146,8 +146,7 @@ function createColdStarts() {
     });
 
     type A = [string, pulumi.Output<string>];
-    //const items: A[] = [["a", pulumi.output("b")]];
-     const items = lambdas.map(l => <A>[l.code, pulumi.interpolate`${api.url}${l.path}`]);
+    const items = lambdas.map(l => <A>[l.code, pulumi.interpolate`${api.url}${l.path}`]);
     return Object.assign.apply(null, items.map(([key, val]) => { return { [key]: val } }))
 }
 
