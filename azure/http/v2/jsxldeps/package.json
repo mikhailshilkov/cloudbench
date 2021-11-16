@@ -1,7 +1,7 @@
 {
   "name": "cloudbench-azure-jsxldeps",
   "dependencies": {
-    "aws-sdk": "^2.395.0",
+    "aws-sdk": "^2.814.0",
     "fb": "^2.0.0",
     "googleapis": "^36.0.0",
     "lodash": "^4.17.11",
