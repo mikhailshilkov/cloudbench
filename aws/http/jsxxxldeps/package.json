@@ -1,7 +1,7 @@
 {
   "name": "cloudbench-aws-jsxxxldeps",
   "dependencies": {
-    "aws-sdk": "^2.395.0",
+    "aws-sdk": "^2.814.0",
     "babel-core": "^6.26.3",
     "body-parser": "^1.18.3",
     "chalk": "^2.4.2",
